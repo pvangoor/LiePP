@@ -1,3 +1,20 @@
+/*
+    This file is part of LiePP.
+
+    LiePP is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LiePP is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with LiePP.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #pragma once
 
 #include "eigen3/Eigen/Dense"
@@ -29,12 +46,6 @@ template <typename _Scalar = double> class SO3 {
 
         Matrix3S Omega = coefficient * (R - R.transpose());
         return vex(Omega);
-
-        // _Scalar s = rotation.quaternion.w();
-        // _Scalar c = rotation.quaternion.vec().norm();
-        // _Scalar theta = atan2(s, c);
-        // Vector3S result = abs(theta) * rotation.quaternion.vec() / c;
-        // return result;
     }
 
     static SO3 SO3FromVectors(const Vector3S& origin, const Vector3S& dest) {

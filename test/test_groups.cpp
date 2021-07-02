@@ -1,8 +1,24 @@
+/*
+    This file is part of LiePP.
+
+    LiePP is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LiePP is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with LiePP.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "liepp/SE3.h"
 #include "liepp/SO3.h"
 #include "eigen3/unsupported/Eigen/MatrixFunctions"
 #include "gtest/gtest.h"
-// #include <iostream>
 
 using namespace std;
 using namespace Eigen;
@@ -128,11 +144,6 @@ TEST(TestCommon, SE3Drift) {
         double error2 = (drifter2.R.asMatrix() * drifter2.R.asMatrix().transpose() - Matrix3d::Identity()).norm();
         double error3 = (drifter3.R.asMatrix() * drifter3.R.asMatrix().transpose() - Matrix3d::Identity()).norm();
         double error4 = (drifter4.R.asMatrix() * drifter4.R.asMatrix().transpose() - Matrix3d::Identity()).norm();
-
-        // std::cout << "rotation drift 1: " << error1 << std::endl;
-        // std::cout << "rotation drift 2: " << error2 << std::endl;
-        // std::cout << "rotation drift 3: " << error3 << std::endl;
-        // std::cout << "rotation drift 4: " << error4 << std::endl;
 
         EXPECT_LE(error1, 1e-8);
         EXPECT_LE(error2, 1e-8);
