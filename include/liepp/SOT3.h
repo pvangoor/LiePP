@@ -21,23 +21,33 @@
 #include "eigen3/Eigen/Dense"
 
 template <typename _Scalar = double> class SOT3 {
+  public:
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
-    using Vector4S = Eigen::Matrix<_Scalar, 4, 1>;
+    using VectorAlgS = Eigen::Matrix<_Scalar, 4, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
-    using Matrix4S = Eigen::Matrix<_Scalar, 4, 4>;
+    using MatrixAlgS = Eigen::Matrix<_Scalar, 4, 4>;
     using SO3S = SO3<_Scalar>;
 
-  public:
-    static Matrix4S wedge(const Vector4S& u);
-    static Vector4S vee(const Matrix4S& U);
-    static SOT3 exp(const Vector4S& w) {
+    static MatrixAlgS wedge(const VectorAlgS& u) {
+        MatrixAlgS U = MatrixAlgS::Zero();
+        U.template block<3,3>(0,0) = SO3S::skew(u.template segment<3>(0));
+        U(3,3) = u(3);
+        return U;
+    }
+    static VectorAlgS vee(const MatrixAlgS& U) {
+        VectorAlgS u;
+        u.template segment<3>(0) = SO3S::vex(U.template block<3, 3>(0,0));
+        u(3) = U(3,3);
+        return u;
+    }
+    static SOT3 exp(const VectorAlgS& w) {
         SOT3 result;
         result.R = SO3S::exp(w.template block<3, 1>(0, 0));
         result.a = std::exp(w(3));
         return result;
     }
-    static Vector4S log(const SOT3& T) {
-        Vector4S result;
+    static VectorAlgS log(const SOT3& T) {
+        VectorAlgS result;
         result.template block<3, 1>(0, 0) = SO3S::log(T.R);
         result(3) = std::log(T.a);
         return result;
@@ -54,7 +64,7 @@ template <typename _Scalar = double> class SOT3 {
         this->R = R;
         this->a = a;
     }
-    SOT3(const Matrix4S& mat) {
+    SOT3(const MatrixAlgS& mat) {
         R.fromMatrix(mat.template block<3, 3>(0, 0));
         a = mat(3, 3);
     }
@@ -74,8 +84,8 @@ template <typename _Scalar = double> class SOT3 {
     SOT3 inverse() const { return SOT3(R.inverse(), 1.0 / a); }
 
     // Set and get
-    Matrix4S asMatrix() const {
-        Matrix4S result = Matrix4S::Identity();
+    MatrixAlgS asMatrix() const {
+        MatrixAlgS result = MatrixAlgS::Identity();
         result.template block<3, 3>(0, 0) = R.asMatrix();
         result(3, 3) = a;
         return result;

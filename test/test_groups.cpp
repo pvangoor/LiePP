@@ -17,13 +17,14 @@
 
 #include "liepp/SE3.h"
 #include "liepp/SO3.h"
+#include "liepp/SOT3.h"
 #include "eigen3/unsupported/Eigen/MatrixFunctions"
 #include "gtest/gtest.h"
 
 using namespace std;
 using namespace Eigen;
 
-TEST(TestCommon, SkewVex) {
+TEST(TestGroups, SkewVex) {
     for (int i = 0; i < 100; ++i) {
         Vector3d v = Vector3d::Random();
         Vector3d w = Vector3d::Random();
@@ -36,21 +37,7 @@ TEST(TestCommon, SkewVex) {
     }
 }
 
-TEST(TestCommon, SO3d) {
-    // Test the SO(3) exponential
-    for (int i = 0; i < 100; ++i) {
-        Vector3d v = Vector3d::Random();
-
-        Matrix3d R1 = SO3d::skew(v).exp();
-        Matrix3d R2 = SO3d::exp(v).asMatrix();
-
-        double error = (R1 - R2).norm();
-        EXPECT_LE(error, 1e-8);
-
-        double errorR = (R1.transpose() * R1 - Matrix3d::Identity()).norm();
-        EXPECT_LE(errorR, 1e-8);
-    }
-
+TEST(TestGroups, SO3FromVectors) {
     // Test generating an SO(3) matrix between two vectors
     for (int i = 0; i < 100; ++i) {
         Vector3d v = Vector3d::Random();
@@ -67,54 +54,9 @@ TEST(TestCommon, SO3d) {
         double errorR = (R.transpose() * R - Matrix3d::Identity()).norm();
         EXPECT_LE(errorR, 1e-8);
     }
-
-    // Test the SO(3) logarithm
-    for (int i = 0; i < 100; ++i) {
-        Matrix3d Omega = SO3d::skew(Vector3d::Random());
-
-        Matrix3d R1 = Omega.exp();
-        Matrix3d R2 = SO3d::exp(SO3d::vex(Omega)).asMatrix();
-
-        Matrix3d Omega11 = R1.log();
-        Matrix3d Omega12 = SO3d::skew(SO3d::log(R1));
-        Matrix3d Omega21 = R2.log();
-        Matrix3d Omega22 = SO3d::skew(SO3d::log(R2));
-
-        EXPECT_LE((Omega - Omega11).norm(), 1e-8);
-        EXPECT_LE((Omega - Omega12).norm(), 1e-8);
-        EXPECT_LE((Omega - Omega21).norm(), 1e-8);
-        EXPECT_LE((Omega - Omega22).norm(), 1e-8);
-    }
 }
 
-TEST(TestCommon, SE3d) {
-    // Test the SE(3) exponential and logarithm
-    for (int i = 0; i < 100; ++i) {
-        Vector3d omega = Vector3d::Random();
-        Vector3d v = Vector3d::Random();
-        Matrix4d U = Matrix4d::Zero();
-        U.block<3, 3>(0, 0) = SO3d::skew(omega);
-        U.block<3, 1>(0, 3) = v;
-
-        Matrix4d X1 = U.exp();
-        Matrix4d X2 = SE3d::exp(SE3d::vee(U)).asMatrix();
-
-        double error = (X1 - X2).norm();
-        EXPECT_LE(error, 1e-8);
-
-        Matrix4d U11 = X1.log();
-        Matrix4d U12 = SE3d::wedge(SE3d::log(X1));
-        Matrix4d U21 = X2.log();
-        Matrix4d U22 = SE3d::wedge(SE3d::log(X2));
-
-        EXPECT_LE((U - U11).norm(), 1e-8);
-        EXPECT_LE((U - U12).norm(), 1e-8);
-        EXPECT_LE((U - U21).norm(), 1e-8);
-        EXPECT_LE((U - U22).norm(), 1e-8);
-    }
-}
-
-TEST(TestCommon, SE3Drift) {
+TEST(TestGroups, SE3Drift) {
     // Test the SE(3) exponential and logarithm
     SE3d drifter1 = SE3d::Identity();
     SE3d drifter2 = SE3d::Identity();
@@ -149,5 +91,38 @@ TEST(TestCommon, SE3Drift) {
         EXPECT_LE(error2, 1e-8);
         EXPECT_LE(error3, 1e-8);
         EXPECT_LE(error4, 1e-8);
+    }
+}
+
+
+
+template <typename T>
+class MatrixGroupTest : public testing::Test {};
+
+using testing::Types;
+typedef Types<SO3d, SE3d, SOT3d> MatrixGroups;
+
+TYPED_TEST_SUITE(MatrixGroupTest, MatrixGroups);
+
+TYPED_TEST(MatrixGroupTest, TestExpLog) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        typename TypeParam::VectorAlgS v = TypeParam::VectorAlgS::Random();
+
+        auto X1 = TypeParam::exp(v).asMatrix();
+        decltype(X1) X2 = TypeParam::wedge(v).exp();
+
+        double expError = (X1 - X2).norm();
+        EXPECT_LE(expError, 1e-8);
+
+        auto v11 = TypeParam::log(TypeParam(X1));
+        auto v12 = TypeParam::vee(X1.log());
+        auto v21 = TypeParam::log(TypeParam(X2));
+        auto v22 = TypeParam::vee(X2.log());
+
+        EXPECT_LE((v - v11).norm(), 1e-8);
+        EXPECT_LE((v - v12).norm(), 1e-8);
+        EXPECT_LE((v - v21).norm(), 1e-8);
+        EXPECT_LE((v - v22).norm(), 1e-8);
     }
 }

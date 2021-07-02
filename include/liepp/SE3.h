@@ -21,30 +21,31 @@
 #include "eigen3/Eigen/Dense"
 
 template <typename _Scalar = double> class SE3 {
+  public:
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
-    using Matrix4S = Eigen::Matrix<_Scalar, 4, 4>;
-    using Vector6S = Eigen::Matrix<_Scalar, 6, 1>;
+    using MatrixAlgS = Eigen::Matrix<_Scalar, 4, 4>;
+    using VectorAlgS = Eigen::Matrix<_Scalar, 6, 1>;
     using Matrix6S = Eigen::Matrix<_Scalar, 6, 6>;
     using SO3S = SO3<_Scalar>;
 
-  public:
-    static Matrix4S wedge(const Vector6S& u) {
+
+    static MatrixAlgS wedge(const VectorAlgS& u) {
         // u is in the format (omega, v)
-        Matrix4S result;
+        MatrixAlgS result;
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template block<3, 1>(0, 0));
         result.template block<3, 1>(0, 3) = u.template block<3, 1>(3, 0);
         result.template block<1, 4>(3, 0) = Eigen::Matrix<_Scalar, 1, 4>::Zero();
         return result;
     }
-    static Vector6S vee(const Matrix4S& U) {
+    static VectorAlgS vee(const MatrixAlgS& U) {
         // u is in the format (omega, v)
-        Vector6S result;
+        VectorAlgS result;
         result.template block<3, 1>(0, 0) = SO3S::vex(U.template block<3, 3>(0, 0));
         result.template block<3, 1>(3, 0) = U.template block<3, 1>(0, 3);
         return result;
     }
-    static Matrix6S adjoint(const Vector6S& u) {
+    static Matrix6S adjoint(const VectorAlgS& u) {
         // u is in the format (omega, v)
         Matrix6S result = Matrix6S::Zero();
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template segment<3>(0));
@@ -52,7 +53,7 @@ template <typename _Scalar = double> class SE3 {
         result.template block<3, 3>(3, 0) = SO3S::skew(u.template segment<3>(3));
         return result;
     }
-    static SE3 exp(const Vector6S& u) {
+    static SE3 exp(const VectorAlgS& u) {
         Vector3S w = u.template block<3, 1>(0, 0);
         Vector3S v = u.template block<3, 1>(3, 0);
 
@@ -72,13 +73,13 @@ template <typename _Scalar = double> class SE3 {
         Matrix3S R = Matrix3S::Identity() + A * wx + B * wx * wx;
         Matrix3S V = Matrix3S::Identity() + B * wx + C * wx * wx;
 
-        Matrix4S expMat = Matrix4S::Identity();
+        MatrixAlgS expMat = MatrixAlgS::Identity();
         expMat.template block<3, 3>(0, 0) = R;
         expMat.template block<3, 1>(0, 3) = V * v;
 
         return SE3(expMat);
     }
-    static Vector6S log(const SE3& P) {
+    static VectorAlgS log(const SE3& P) {
         SO3S R = P.R;
         Vector3S x = P.x;
 
@@ -93,7 +94,7 @@ template <typename _Scalar = double> class SE3 {
         Matrix3S VInv = Matrix3S::Identity() - 0.5 * Omega + coefficient * Omega * Omega;
         Vector3S v = VInv * x;
 
-        Matrix4S U = Matrix4S::Zero();
+        MatrixAlgS U = MatrixAlgS::Zero();
         U.template block<3, 3>(0, 0) = Omega;
         U.template block<3, 1>(0, 3) = v;
 
@@ -106,7 +107,7 @@ template <typename _Scalar = double> class SE3 {
         R = other.R;
         x = other.x;
     }
-    SE3(const Matrix4S& mat) {
+    SE3(const MatrixAlgS& mat) {
         R = SO3S(mat.template block<3, 3>(0, 0));
         x = mat.template block<3, 1>(0, 3);
     }
@@ -138,14 +139,14 @@ template <typename _Scalar = double> class SE3 {
     }
 
     // Set and get
-    Matrix4S asMatrix() const {
-        Matrix4S result;
+    MatrixAlgS asMatrix() const {
+        MatrixAlgS result;
         result.setIdentity();
         result.template block<3, 3>(0, 0) = R.asMatrix();
         result.template block<3, 1>(0, 3) = x;
         return result;
     }
-    void fromMatrix(const Matrix4S& mat) {
+    void fromMatrix(const MatrixAlgS& mat) {
         R.fromMatrix(mat.template block<3, 3>(0, 0));
         x = mat.template block<3, 1>(0, 3);
     }

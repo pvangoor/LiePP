@@ -1,5 +1,5 @@
-project(LiePP)
 cmake_minimum_required(VERSION 3.0)
+project(LiePP VERSION 1.0)
 
 set(liepp_HEADER_FILES
     include/liepp/SO3.h

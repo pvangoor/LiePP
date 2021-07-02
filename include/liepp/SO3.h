@@ -20,18 +20,20 @@
 #include "eigen3/Eigen/Dense"
 
 template <typename _Scalar = double> class SO3 {
-    using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
-    using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
+  public:
+    using MatrixAlgS = Eigen::Matrix<_Scalar, 3, 3>;
+    using VectorAlgS = Eigen::Matrix<_Scalar, 3, 1>;
     using QuaternionS = Eigen::Quaternion<_Scalar>;
 
-  public:
-    static Matrix3S skew(const Vector3S& v) {
-        return (Matrix3S() << 0, -v(2), v(1), v(2), 0, -v(0), -v(1), v(0), 0).finished();
+    static MatrixAlgS skew(const VectorAlgS& v) {
+        return (MatrixAlgS() << 0, -v(2), v(1), v(2), 0, -v(0), -v(1), v(0), 0).finished();
     }
+    static MatrixAlgS wedge(const VectorAlgS& v) {return skew(v);}
 
-    static Vector3S vex(const Matrix3S& M) { return (Vector3S() << M(2, 1), M(0, 2), M(1, 0)).finished(); }
+    static VectorAlgS vex(const MatrixAlgS& M) { return (VectorAlgS() << M(2, 1), M(0, 2), M(1, 0)).finished(); }
+    static VectorAlgS vee(const MatrixAlgS& M) {return vex(M);}
 
-    static SO3 exp(const Vector3S& w) {
+    static SO3 exp(const VectorAlgS& w) {
         _Scalar theta = w.norm() / 2.0;
         QuaternionS result;
         result.w() = cos(theta);
@@ -39,16 +41,16 @@ template <typename _Scalar = double> class SO3 {
         return SO3(result);
     }
 
-    static Vector3S log(const SO3& rotation) {
-        Matrix3S R = rotation.asMatrix();
+    static VectorAlgS log(const SO3& rotation) {
+        MatrixAlgS R = rotation.asMatrix();
         _Scalar theta = acos((R.trace() - 1.0) / 2.0);
         _Scalar coefficient = (abs(theta) >= 1e-6) ? theta / (2.0 * sin(theta)) : 0.5;
 
-        Matrix3S Omega = coefficient * (R - R.transpose());
+        MatrixAlgS Omega = coefficient * (R - R.transpose());
         return vex(Omega);
     }
 
-    static SO3 SO3FromVectors(const Vector3S& origin, const Vector3S& dest) {
+    static SO3 SO3FromVectors(const VectorAlgS& origin, const VectorAlgS& dest) {
         SO3 result;
         result.quaternion.setFromTwoVectors(origin, dest);
         return result;
@@ -57,21 +59,21 @@ template <typename _Scalar = double> class SO3 {
     static SO3 Identity() { return SO3(QuaternionS::Identity()); }
 
     SO3() = default;
-    SO3(const Matrix3S& mat) { quaternion = mat; }
+    SO3(const MatrixAlgS& mat) { quaternion = mat; }
     SO3(const QuaternionS& quat) { quaternion = quat; }
     SO3 inverse() const { return SO3(quaternion.inverse()); }
 
     void setIdentity() { quaternion = QuaternionS::Identity(); }
-    Vector3S operator*(const Vector3S& point) const { return quaternion * point; }
+    VectorAlgS operator*(const VectorAlgS& point) const { return quaternion * point; }
     SO3 operator*(const SO3& other) const { return SO3(quaternion * other.quaternion); }
-    Vector3S applyInverse(const Vector3S& point) const { return quaternion.inverse() * point; }
+    VectorAlgS applyInverse(const VectorAlgS& point) const { return quaternion.inverse() * point; }
 
     void invert() { quaternion = quaternion.inverse(); }
 
     // Set and get
-    Matrix3S asMatrix() const { return quaternion.toRotationMatrix(); }
+    MatrixAlgS asMatrix() const { return quaternion.toRotationMatrix(); }
     QuaternionS asQuaternion() const { return quaternion; }
-    void fromMatrix(const Matrix3S& mat) { quaternion = mat; }
+    void fromMatrix(const MatrixAlgS& mat) { quaternion = mat; }
     void fromQuaternion(const QuaternionS& quat) { quaternion = quat; }
 
   private:
