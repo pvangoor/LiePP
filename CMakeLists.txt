@@ -5,6 +5,7 @@ set(liepp_HEADER_FILES
     include/liepp/SO3.h
     include/liepp/SE3.h
     include/liepp/SOT3.h
+    include/liepp/SEn3.h
 )
 
 add_library(liepp INTERFACE)
