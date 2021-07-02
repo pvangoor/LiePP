@@ -18,6 +18,7 @@
 #include "liepp/SE3.h"
 #include "liepp/SO3.h"
 #include "liepp/SOT3.h"
+#include "liepp/SEn3.h"
 #include "eigen3/unsupported/Eigen/MatrixFunctions"
 #include "gtest/gtest.h"
 
@@ -100,7 +101,7 @@ template <typename T>
 class MatrixGroupTest : public testing::Test {};
 
 using testing::Types;
-typedef Types<SO3d, SE3d, SOT3d> MatrixGroups;
+typedef Types<SO3d, SE3d, SOT3d, SE23d> MatrixGroups;
 
 TYPED_TEST_SUITE(MatrixGroupTest, MatrixGroups);
 
@@ -124,5 +125,16 @@ TYPED_TEST(MatrixGroupTest, TestExpLog) {
         EXPECT_LE((v - v12).norm(), 1e-8);
         EXPECT_LE((v - v21).norm(), 1e-8);
         EXPECT_LE((v - v22).norm(), 1e-8);
+    }
+}
+
+TYPED_TEST(MatrixGroupTest, TestWedgeVee) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        typename TypeParam::VectorAlgS v = TypeParam::VectorAlgS::Random();
+        typename TypeParam::MatrixAlgS vWedge = TypeParam::wedge(v);
+        typename TypeParam::VectorAlgS vWedgeVee = TypeParam::vee(vWedge);
+        double wedgeError = (vWedgeVee - v).norm();
+        EXPECT_LE(wedgeError, 1e-8);
     }
 }

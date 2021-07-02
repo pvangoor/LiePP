@@ -22,36 +22,36 @@
 #include <array>
 
 template <int n, typename _Scalar = double> class SEn3 {
+  public:
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
-    using Matrix3nS = Eigen::Matrix<_Scalar, 3+n, 3+n>;
-    using VectorGS = Eigen::Matrix<_Scalar, 3+3*n, 1>;
-    using MatrixGS = Eigen::Matrix<_Scalar, 3+3*n, 6>;
+    using MatrixAlgS = Eigen::Matrix<_Scalar, 3+n, 3+n>;
+    using VectorAlgS = Eigen::Matrix<_Scalar, 3+3*n, 1>;
+    using MatrixGS = Eigen::Matrix<_Scalar, 3+3*n, 3+3*n>;
     using SO3S = SO3<_Scalar>;
 
-  public:
-    static Matrix3nS wedge(const VectorGS& u) {
+    static MatrixAlgS wedge(const VectorAlgS& u) {
         // u is in the format (omega, v_1, ..., v_n)
-        Matrix3nS result;
+        MatrixAlgS result;
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template block<3, 1>(0, 0));
         for (int i=0;i<n;++i) {
-            result.template block<3, 3>(0, 3+i) = u.template block<3, 1>(3+3*i, 0);
+            result.template block<3, 1>(0, 3+i) = u.template block<3, 1>(3+3*i, 0);
         }
         result.template block<n, 3+n>(3, 0) = Eigen::Matrix<_Scalar, n, 3+n>::Zero();
         return result;
     }
-    static VectorGS vee(const Matrix3nS& U) {
+    static VectorAlgS vee(const MatrixAlgS& U) {
         // u is in the format (omega, v)
-        VectorGS result;
+        VectorAlgS result;
         result.template block<3, 1>(0, 0) = SO3S::vex(U.template block<3, 3>(0, 0));
         for (int i=0;i<n;++i) {
-            result.template block<3, 1>(3+3*i, 0) = U.template block<3, 3>(0, 3+i);
+            result.template block<3, 1>(3+3*i, 0) = U.template block<3, 1>(0, 3+i);
         }
         return result;
     }
-    static MatrixGS adjoint(const VectorGS& u) {
+    static MatrixGS adjoint(const VectorAlgS& u) {
         // u is in the format (omega, v)
-        MatrixGS result = Matrix6S::Zero();
+        MatrixGS result = MatrixGS::Zero();
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template segment<3>(0));
         for (int i=0;i<n;++i) {
             result.template block<3, 3>(3+3*i, 3+3*i) = SO3S::skew(u.template segment<3>(0));
@@ -59,11 +59,11 @@ template <int n, typename _Scalar = double> class SEn3 {
         }
         return result;
     }
-    static SEn3 exp(const VectorGS& u) {
+    static SEn3 exp(const VectorAlgS& u) {
         Vector3S w = u.template block<3, 1>(0, 0);
         std::array<Vector3S, n> v;
         for (int i=0; i<n; ++i) {
-            v[i] = u.template block<3, 1>(3+3*i, 0);
+            v[i] = u.template segment<3>(3+3*i);
         }
 
         _Scalar th = w.norm();
@@ -83,12 +83,12 @@ template <int n, typename _Scalar = double> class SEn3 {
         Matrix3S V = Matrix3S::Identity() + B * wx + C * wx * wx;
 
         SEn3 result;
-        result.R = SO3(R);
+        result.R = SO3S(R);
         std::transform(v.begin(), v.end(), result.x.begin(), [&V](const Vector3S& v_i){return V * v_i;});
 
         return result;
     }
-    static Vector6S log(const SE3& P) {
+    static VectorAlgS log(const SEn3& P) {
         Matrix3S Omega = SO3S::skew(SO3S::log(P.R));
 
         _Scalar theta = SO3S::vex(Omega).norm();
@@ -99,10 +99,10 @@ template <int n, typename _Scalar = double> class SEn3 {
 
         Matrix3S VInv = Matrix3S::Identity() - 0.5 * Omega + coefficient * Omega * Omega;
 
-        VectorGS u = MatrixGS::Zero();
+        VectorAlgS u = VectorAlgS::Zero();
         u.template segment<3>(0) = SO3S::vex(Omega);
         for (int i=0; i<n; ++i){
-            u.template segment<3>(3+3*i) = VINv * P.x[i];
+            u.template segment<3>(3+3*i) = VInv * P.x[i];
         }
 
         return u;
@@ -110,22 +110,22 @@ template <int n, typename _Scalar = double> class SEn3 {
     static SEn3 Identity() {
         SEn3 result;
         result.R.setIdentity();
-        std::for_each(result.x.begin(), result.x.end() [](Vector3S& x_i){x_i.setZero(); });
+        std::for_each(result.x.begin(), result.x.end(), [](Vector3S& x_i){x_i.setZero(); });
         return result;
     }
 
     SEn3() = default;
-    SEn3(const SE3& other) {
+    SEn3(const SEn3& other) {
         R = other.R;
         x = other.x;
     }
-    SEn3(const Matrix3nS& mat) {
+    SEn3(const MatrixAlgS& mat) {
         R = SO3S(mat.template block<3, 3>(0, 0));
         for (int i=0;i<n;++i) {
-            x[i] = mat.template block<3, 1>(0, 3+3*i);
+            x[i] = mat.template block<3, 1>(0, 3+i);
         }
     }
-    SEn3(const SO3S& R, const Vector3S& x) {
+    SEn3(const SO3S& R, const std::array<Vector3S, n>& x) {
         this->R = R;
         this->x = x;
     }
@@ -178,19 +178,19 @@ template <int n, typename _Scalar = double> class SEn3 {
     }
 
     // Set and get
-    Matrix3nS asMatrix() const {
-        Matrix3nS result;
+    MatrixAlgS asMatrix() const {
+        MatrixAlgS result;
         result.setIdentity();
         result.template block<3, 3>(0, 0) = R.asMatrix();
         for (int i=0;i<n;++i){
-            result.template block<3, 1>(0, 3+3*i) = x[i];
+            result.template block<3, 1>(0, 3+i) = x[i];
         }
         return result;
     }
-    void fromMatrix(const Matrix4S& mat) {
+    void fromMatrix(const MatrixAlgS& mat) {
         R.fromMatrix(mat.template block<3, 3>(0, 0));
         for (int i=0;i<n;++i){
-            x[i] = mat.template block<3, 1>(0, 3+3*i);
+            x[i] = mat.template block<3, 1>(0, 3+i);
         }
     }
 
@@ -198,12 +198,12 @@ template <int n, typename _Scalar = double> class SEn3 {
     std::array<Vector3S, n> x;
 };
 
-// typedef SEn3<double> SE3d;
-// typedef SEn3<float> SE3f;
-// typedef SEn3<Eigen::dcomplex> SE3cd;
-// typedef SEn3<Eigen::scomplex> SE3cf;
+template<int n> using SEn3d = SEn3<n, double>;
+template<int n> using SEn3f = SEn3<n, float>;
+template<int n> using SEn3cd = SEn3<n, Eigen::dcomplex>;
+template<int n> using SEn3cf = SEn3<n, Eigen::scomplex>;
 
-// typedef Eigen::Matrix<double, 6, 1> se3d;
-// typedef Eigen::Matrix<float, 6, 1> se3f;
-// typedef Eigen::Matrix<Eigen::dcomplex, 6, 1> se3cd;
-// typedef Eigen::Matrix<Eigen::scomplex, 6, 1> se3cf;
+typedef SEn3<2, double> SE23d;
+typedef SEn3<2, float> SE23f;
+typedef SEn3<2, Eigen::dcomplex> SE23cd;
+typedef SEn3<2, Eigen::scomplex> SE23cf;
