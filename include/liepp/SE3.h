@@ -101,6 +101,7 @@ template <typename _Scalar = double> class SE3 {
         return SE3::vee(U);
     }
     static SE3 Identity() { return SE3(SO3S::Identity(), Vector3S::Zero()); }
+    static SE3 Random() { return SE3(SO3S::Random(), Vector3S::Random()); }
 
     SE3() = default;
     SE3(const SE3& other) {

@@ -57,6 +57,7 @@ template <typename _Scalar = double> class SO3 {
     }
 
     static SO3 Identity() { return SO3(QuaternionS::Identity()); }
+    static SO3 Random() { return SO3(QuaternionS::UnitRandom()); }
 
     SO3() = default;
     SO3(const MatrixAlgS& mat) { quaternion = mat; }

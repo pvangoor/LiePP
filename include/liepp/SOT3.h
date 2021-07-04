@@ -57,6 +57,7 @@ template <typename _Scalar = double> class SOT3 {
         Q.setIdentity();
         return Q;
     }
+    static SOT3 Random() { return SOT3( SO3S::Random(), exp(_Scalar(rand() / RAND_MAX)) ); }
 
     SOT3() = default;
     SOT3(const SOT3& other) = default;

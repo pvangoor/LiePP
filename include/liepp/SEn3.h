@@ -113,6 +113,12 @@ template <int n, typename _Scalar = double> class SEn3 {
         std::for_each(result.x.begin(), result.x.end(), [](Vector3S& x_i){x_i.setZero(); });
         return result;
     }
+    static SEn3 Random() { 
+        SEn3 result;
+        result.R = SO3S::Random();
+        std::for_each(result.x.begin(), result.x.end(), [](Vector3S& x_i){x_i.setRandom(); });
+        return result;
+    }
 
     SEn3() = default;
     SEn3(const SEn3& other) {
