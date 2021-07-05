@@ -113,7 +113,7 @@ template <typename _Scalar = double> class SOT3 {
     _Scalar a;
 };
 
-typedef SOT3<double> SOT3d;
-typedef SOT3<float> SOT3f;
-typedef SOT3<Eigen::dcomplex> SOT3cd;
-typedef SOT3<Eigen::scomplex> SOT3cf;
+using SOT3d = SOT3<double>;
+using SOT3f = SOT3<float>;
+using SOT3cd = SOT3<Eigen::dcomplex>;
+using SOT3cf = SOT3<Eigen::scomplex>;

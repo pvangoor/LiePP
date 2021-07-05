@@ -156,12 +156,12 @@ template <typename _Scalar = double> class SE3 {
     Vector3S x;
 };
 
-typedef SE3<double> SE3d;
-typedef SE3<float> SE3f;
-typedef SE3<Eigen::dcomplex> SE3cd;
-typedef SE3<Eigen::scomplex> SE3cf;
+using SE3d = SE3<double>;
+using SE3f = SE3<float>;
+using SE3cd = SE3<Eigen::dcomplex>;
+using SE3cf = SE3<Eigen::scomplex>;
 
-typedef Eigen::Matrix<double, 6, 1> se3d;
-typedef Eigen::Matrix<float, 6, 1> se3f;
-typedef Eigen::Matrix<Eigen::dcomplex, 6, 1> se3cd;
-typedef Eigen::Matrix<Eigen::scomplex, 6, 1> se3cf;
+using se3d = Eigen::Matrix<double, 6, 1>;
+using se3f = Eigen::Matrix<float, 6, 1>;
+using se3cd = Eigen::Matrix<Eigen::dcomplex, 6, 1>;
+using se3cf = Eigen::Matrix<Eigen::scomplex, 6, 1>;

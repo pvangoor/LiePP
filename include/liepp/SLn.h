@@ -117,7 +117,7 @@ template <int n, typename _Scalar = double> class SLn {
     MatrixNS H;
 };
 
-typedef SLn<3, double> SL3d;
-typedef SLn<3, float> SL3f;
-typedef SLn<3, Eigen::dcomplex> SL3cd;
-typedef SLn<3, Eigen::scomplex> SL3cf;
+using SL3d = SLn<3, double>;
+using SL3f = SLn<3, float>;
+using SL3cd = SLn<3, Eigen::dcomplex>;
+using SL3cf = SLn<3, Eigen::scomplex>;

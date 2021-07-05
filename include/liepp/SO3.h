@@ -84,7 +84,7 @@ template <typename _Scalar = double> class SO3 {
     QuaternionS quaternion;
 };
 
-typedef SO3<double> SO3d;
-typedef SO3<float> SO3f;
-typedef SO3<Eigen::dcomplex> SO3cd;
-typedef SO3<Eigen::scomplex> SO3cf;
+using SO3d = SO3<double>;
+using SO3f = SO3<float>;
+using SO3cd = SO3<Eigen::dcomplex>;
+using SO3cf = SO3<Eigen::scomplex>;

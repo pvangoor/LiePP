@@ -209,7 +209,7 @@ template<int n> using SEn3f = SEn3<n, float>;
 template<int n> using SEn3cd = SEn3<n, Eigen::dcomplex>;
 template<int n> using SEn3cf = SEn3<n, Eigen::scomplex>;
 
-typedef SEn3<2, double> SE23d;
-typedef SEn3<2, float> SE23f;
-typedef SEn3<2, Eigen::dcomplex> SE23cd;
-typedef SEn3<2, Eigen::scomplex> SE23cf;
+using SE23d = SEn3<2, double>;
+using SE23f = SEn3<2, float>;
+using SE23cd = SEn3<2, Eigen::dcomplex>;
+using SE23cf = SEn3<2, Eigen::scomplex>;
