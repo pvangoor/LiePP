@@ -23,21 +23,22 @@
 template <typename _Scalar = double> class SOT3 {
   public:
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
-    using VectorDS = Eigen::Matrix<_Scalar, 4, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
     using MatrixNS = Eigen::Matrix<_Scalar, 4, 4>;
+    using VectorDS = Eigen::Matrix<_Scalar, 4, 1>;
+    using MatrixDS = Eigen::Matrix<_Scalar, 4, 4>;
     using SO3S = SO3<_Scalar>;
 
     static MatrixNS wedge(const VectorDS& u) {
         MatrixNS U = MatrixNS::Zero();
-        U.template block<3,3>(0,0) = SO3S::skew(u.template segment<3>(0));
-        U(3,3) = u(3);
+        U.template block<3, 3>(0, 0) = SO3S::skew(u.template segment<3>(0));
+        U(3, 3) = u(3);
         return U;
     }
     static VectorDS vee(const MatrixNS& U) {
         VectorDS u;
-        u.template segment<3>(0) = SO3S::vex(U.template block<3, 3>(0,0));
-        u(3) = U(3,3);
+        u.template segment<3>(0) = SO3S::vex(U.template block<3, 3>(0, 0));
+        u(3) = U(3, 3);
         return u;
     }
     static SOT3 exp(const VectorDS& w) {
@@ -55,13 +56,13 @@ template <typename _Scalar = double> class SOT3 {
 
     static MatrixNS adjoint(const VectorDS& u) {
         MatrixNS ad_u = MatrixNS::Zero();
-        ad_u.template block<3,3>(0,0) = SO3S::skew(u.template segment<3>(0));
+        ad_u.template block<3, 3>(0, 0) = SO3S::skew(u.template segment<3>(0));
         return ad_u;
     }
 
     MatrixNS Adjoint() const {
         MatrixNS AdMatrix = MatrixNS::Identity();
-        AdMatrix.template block<3,3>(0,0) = this->R.asMatrix();
+        AdMatrix.template block<3, 3>(0, 0) = this->R.asMatrix();
         return AdMatrix;
     }
 
@@ -70,7 +71,7 @@ template <typename _Scalar = double> class SOT3 {
         Q.setIdentity();
         return Q;
     }
-    static SOT3 Random() { return SOT3( SO3S::Random(), std::exp(_Scalar(rand() / RAND_MAX)) ); }
+    static SOT3 Random() { return SOT3(SO3S::Random(), std::exp(_Scalar(rand() / RAND_MAX))); }
 
     SOT3() = default;
     SOT3(const SOT3& other) = default;

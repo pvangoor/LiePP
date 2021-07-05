@@ -22,13 +22,13 @@
 
 template <typename _Scalar = double> class SE3 {
   public:
+    constexpr static int grpDim = 6;
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
     using MatrixNS = Eigen::Matrix<_Scalar, 4, 4>;
     using VectorDS = Eigen::Matrix<_Scalar, 6, 1>;
-    using Matrix6S = Eigen::Matrix<_Scalar, 6, 6>;
+    using MatrixDS = Eigen::Matrix<_Scalar, 6, 6>;
     using SO3S = SO3<_Scalar>;
-
 
     static MatrixNS wedge(const VectorDS& u) {
         // u is in the format (omega, v)
@@ -45,9 +45,9 @@ template <typename _Scalar = double> class SE3 {
         result.template block<3, 1>(3, 0) = U.template block<3, 1>(0, 3);
         return result;
     }
-    static Matrix6S adjoint(const VectorDS& u) {
+    static MatrixDS adjoint(const VectorDS& u) {
         // u is in the format (omega, v)
-        Matrix6S result = Matrix6S::Zero();
+        MatrixDS result = MatrixDS::Zero();
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template segment<3>(0));
         result.template block<3, 3>(3, 3) = SO3S::skew(u.template segment<3>(0));
         result.template block<3, 3>(3, 0) = SO3S::skew(u.template segment<3>(3));
@@ -129,8 +129,8 @@ template <typename _Scalar = double> class SE3 {
         R = R.inverse();
     }
     SE3 inverse() const { return SE3(R.inverse(), -(R.inverse() * x)); }
-    Matrix6S Adjoint() const {
-        Matrix6S AdMat;
+    MatrixDS Adjoint() const {
+        MatrixDS AdMat;
         Matrix3S Rmat = R.asMatrix();
         AdMat.template block<3, 3>(0, 0) = Rmat;
         AdMat.template block<3, 3>(0, 3) = Matrix3S::Zero();

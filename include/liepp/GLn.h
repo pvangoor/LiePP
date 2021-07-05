@@ -24,27 +24,27 @@ template <int n, typename _Scalar = double> class GLn {
     // The special linear group of n dimensions.
     // n by n matrices with determinant 1.
   public:
-    constexpr static int grpDim = n*n;
-    using MatrixNS = Eigen::Matrix<_Scalar, n, n>;
+    constexpr static int grpDim = n * n;
     using VectorNS = Eigen::Matrix<_Scalar, n, 1>;
+    using MatrixNS = Eigen::Matrix<_Scalar, n, n>;
     using VectorDS = Eigen::Matrix<_Scalar, grpDim, 1>;
     using MatrixDS = Eigen::Matrix<_Scalar, grpDim, grpDim>;
 
     static MatrixNS wedge(const VectorDS& u) {
         MatrixNS M;
-        for (int i=0;i<n;++i) {
-            for (int j=0;j<n;++j) {
-                M(i,j) = u(n*i+j);
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                M(i, j) = u(n * i + j);
             }
         }
         return M;
     }
 
-    static VectorDS vee(const MatrixNS& M) { 
+    static VectorDS vee(const MatrixNS& M) {
         VectorDS u;
-        for (int i=0;i<n;++i) {
-            for (int j=0;j<n;++j) {
-                u(n*i+j) = M(i,j);
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                u(n * i + j) = M(i, j);
             }
         }
         return u;
@@ -53,20 +53,16 @@ template <int n, typename _Scalar = double> class GLn {
     static MatrixDS adjoint(const VectorDS& u) {
         const auto uWedge = wedge(u);
         MatrixDS adMat;
-        for (int i=0;i<grpDim; ++i) {
+        for (int i = 0; i < grpDim; ++i) {
             const auto eiWedge = wedge(VectorDS::Unit(i));
             adMat.template block<grpDim, 1>(0, i) = vee(uWedge * eiWedge - eiWedge * uWedge);
         }
         return adMat;
     }
 
-    static GLn exp(const VectorDS& u) {
-        return GLn(wedge(u).exp());
-    }
+    static GLn exp(const VectorDS& u) { return GLn(wedge(u).exp()); }
 
-    static VectorDS log(const GLn& X) {
-        return vee(X.asMatrix().log());
-    }
+    static VectorDS log(const GLn& X) { return vee(X.asMatrix().log()); }
 
     static GLn Identity() { return GLn(MatrixNS::Identity()); }
     static GLn Random() {
@@ -86,7 +82,7 @@ template <int n, typename _Scalar = double> class GLn {
     MatrixDS Adjoint() const {
         MatrixNS AInv = A.inverse();
         MatrixDS AdMat;
-        for (int i=0;i<grpDim; ++i) {
+        for (int i = 0; i < grpDim; ++i) {
             const auto ei = VectorDS::Unit(i);
             AdMat.template block<grpDim, 1>(0, i) = vee(A * wedge(ei) * AInv);
         }
@@ -108,7 +104,7 @@ template <int n, typename _Scalar = double> class GLn {
     MatrixNS A;
 };
 
-template<int n> using GLnd = GLn<n, double>;
-template<int n> using GLnf = GLn<n, float>;
-template<int n> using GLncd = GLn<n, Eigen::dcomplex>;
-template<int n> using GLncf = GLn<n, Eigen::scomplex>;
+template <int n> using GLnd = GLn<n, double>;
+template <int n> using GLnf = GLn<n, float>;
+template <int n> using GLncd = GLn<n, Eigen::dcomplex>;
+template <int n> using GLncf = GLn<n, Eigen::scomplex>;

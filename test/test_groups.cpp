@@ -15,13 +15,13 @@
     along with LiePP.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "eigen3/unsupported/Eigen/MatrixFunctions"
+#include "liepp/GLn.h"
 #include "liepp/SE3.h"
-#include "liepp/SO3.h"
-#include "liepp/SOT3.h"
 #include "liepp/SEn3.h"
 #include "liepp/SLn.h"
-#include "liepp/GLn.h"
-#include "eigen3/unsupported/Eigen/MatrixFunctions"
+#include "liepp/SO3.h"
+#include "liepp/SOT3.h"
 #include "gtest/gtest.h"
 
 using namespace std;
@@ -30,9 +30,9 @@ using namespace Eigen;
 void testMatrixEquality(const MatrixXd& M1, const MatrixXd& M2, const double abs_error = 1e-8) {
     ASSERT_EQ(M1.rows(), M2.rows());
     ASSERT_EQ(M1.cols(), M2.cols());
-    for (int i=0; i<M1.rows(); ++i) {
-        for (int j=0; j<M1.cols(); ++j) {
-            EXPECT_NEAR(M1(i,j), M2(i,j), abs_error);
+    for (int i = 0; i < M1.rows(); ++i) {
+        for (int j = 0; j < M1.cols(); ++j) {
+            EXPECT_NEAR(M1(i, j), M2(i, j), abs_error);
         }
     }
 }
@@ -54,8 +54,7 @@ TEST(TestGroups, SO3FromVectors) {
     }
 }
 
-template <typename T>
-class MatrixGroupTest : public testing::Test {};
+template <typename T> class MatrixGroupTest : public testing::Test {};
 
 using testing::Types;
 typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>> MatrixGroups;
@@ -101,7 +100,7 @@ TYPED_TEST(MatrixGroupTest, TestAssociativity) {
 
         TypeParam Z1 = (X1 * X2) * X3;
         TypeParam Z2 = X1 * (X2 * X3);
-        
+
         testMatrixEquality(Z1.asMatrix(), Z2.asMatrix());
     }
 }
@@ -113,7 +112,7 @@ TYPED_TEST(MatrixGroupTest, TestIdentity) {
 
         TypeParam X1 = X * I;
         TypeParam X2 = I * X;
-        
+
         testMatrixEquality(X.asMatrix(), X1.asMatrix());
         testMatrixEquality(X.asMatrix(), X2.asMatrix());
     }
@@ -127,7 +126,7 @@ TYPED_TEST(MatrixGroupTest, TestInverse) {
 
         TypeParam I1 = X * XInv;
         TypeParam I2 = XInv * X;
-        
+
         testMatrixEquality(I.asMatrix(), I1.asMatrix());
         testMatrixEquality(I.asMatrix(), I2.asMatrix());
     }
@@ -137,10 +136,10 @@ TYPED_TEST(MatrixGroupTest, TestMatrixGroupAdjoint) {
     for (int i = 0; i < 100; ++i) {
         TypeParam X = TypeParam::Random();
         typename TypeParam::VectorDS U = TypeParam::VectorDS::Random();
-        
+
         typename TypeParam::MatrixNS Ad_XU1 = TypeParam::wedge(X.Adjoint() * U);
         typename TypeParam::MatrixNS Ad_XU2 = X.asMatrix() * TypeParam::wedge(U) * X.inverse().asMatrix();
-        
+
         testMatrixEquality(Ad_XU1, Ad_XU2);
     }
 }
@@ -149,14 +148,14 @@ TYPED_TEST(MatrixGroupTest, TestMatrixAlgebraAdjoint) {
     for (int i = 0; i < 100; ++i) {
         typename TypeParam::VectorDS V = TypeParam::VectorDS::Random();
         typename TypeParam::VectorDS U = TypeParam::VectorDS::Random();
-        
+
         typename TypeParam::MatrixNS ad_VU1 = TypeParam::wedge(TypeParam::adjoint(V) * U);
-        typename TypeParam::MatrixNS ad_VU2 = TypeParam::wedge(V) * TypeParam::wedge(U) - TypeParam::wedge(U) * TypeParam::wedge(V);
-        
+        typename TypeParam::MatrixNS ad_VU2 =
+            TypeParam::wedge(V) * TypeParam::wedge(U) - TypeParam::wedge(U) * TypeParam::wedge(V);
+
         testMatrixEquality(ad_VU1, ad_VU2);
     }
 }
-
 
 TYPED_TEST(MatrixGroupTest, TestMatrixProduct) {
     for (int i = 0; i < 100; ++i) {
@@ -165,7 +164,7 @@ TYPED_TEST(MatrixGroupTest, TestMatrixProduct) {
 
         typename TypeParam::MatrixNS Z1 = X1.asMatrix() * X2.asMatrix();
         typename TypeParam::MatrixNS Z2 = (X1 * X2).asMatrix();
-        
+
         testMatrixEquality(Z1, Z2);
     }
 }
@@ -173,7 +172,7 @@ TYPED_TEST(MatrixGroupTest, TestMatrixProduct) {
 TYPED_TEST(MatrixGroupTest, TestMatrixIdentity) {
     typename TypeParam::MatrixNS I1 = TypeParam::MatrixNS::Identity();
     typename TypeParam::MatrixNS I2 = TypeParam::Identity().asMatrix();
-    
+
     testMatrixEquality(I1, I2);
 }
 
@@ -183,7 +182,7 @@ TYPED_TEST(MatrixGroupTest, TestMatrixInverse) {
 
         typename TypeParam::MatrixNS XInv1 = X.inverse().asMatrix();
         typename TypeParam::MatrixNS XInv2 = X.asMatrix().inverse();
-        
+
         testMatrixEquality(XInv1, XInv2);
     }
 }
