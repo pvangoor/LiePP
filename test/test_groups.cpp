@@ -20,6 +20,7 @@
 #include "liepp/SOT3.h"
 #include "liepp/SEn3.h"
 #include "liepp/SLn.h"
+#include "liepp/GLn.h"
 #include "eigen3/unsupported/Eigen/MatrixFunctions"
 #include "gtest/gtest.h"
 
@@ -57,7 +58,7 @@ template <typename T>
 class MatrixGroupTest : public testing::Test {};
 
 using testing::Types;
-typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d> MatrixGroups;
+typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>> MatrixGroups;
 
 TYPED_TEST_SUITE(MatrixGroupTest, MatrixGroups);
 
