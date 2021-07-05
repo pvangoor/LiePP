@@ -24,15 +24,31 @@
 #include "liepp/SOT3.h"
 #include "gtest/gtest.h"
 
+#include <type_traits>
+template <class T> struct is_complex : std::false_type {};
+template <class T> struct is_complex<std::complex<T>> : std::true_type {};
+
 using namespace std;
 using namespace Eigen;
 
-void testMatrixEquality(const MatrixXd& M1, const MatrixXd& M2, const double abs_error = 1e-8) {
-    ASSERT_EQ(M1.rows(), M2.rows());
-    ASSERT_EQ(M1.cols(), M2.cols());
+template <typename _Scalar, std::enable_if_t<is_complex<_Scalar>::value, bool> = true>
+void expectNear(const _Scalar& a, const _Scalar& b, const double abs_error = 1e-8) {
+    EXPECT_NEAR(a.real(), b.real(), abs_error);
+    EXPECT_NEAR(a.imag(), b.imag(), abs_error);
+}
+
+template <typename _Scalar, std::enable_if_t<!is_complex<_Scalar>::value, bool> = true>
+void expectNear(const _Scalar& a, const _Scalar& b, const double abs_error = 1e-8) {
+    EXPECT_NEAR(a, b, abs_error);
+}
+
+template <typename _Scalar, int rows, int cols>
+void testMatrixEquality(
+    const Eigen::Matrix<_Scalar, rows, cols>& M1, const Eigen::Matrix<_Scalar, rows, cols>& M2,
+    const double abs_error = 1e-8) {
     for (int i = 0; i < M1.rows(); ++i) {
         for (int j = 0; j < M1.cols(); ++j) {
-            EXPECT_NEAR(M1(i, j), M2(i, j), abs_error);
+            expectNear(M1(i, j), M2(i, j), abs_error);
         }
     }
 }
@@ -50,14 +66,13 @@ TEST(TestGroups, SO3FromVectors) {
         Vector3d w2 = R * v;
 
         testMatrixEquality(w, w2);
-        testMatrixEquality(R.transpose() * R, Matrix3d::Identity());
     }
 }
 
 template <typename T> class MatrixGroupTest : public testing::Test {};
 
 using testing::Types;
-typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>> MatrixGroups;
+typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>, GLncd<3>> MatrixGroups;
 
 TYPED_TEST_SUITE(MatrixGroupTest, MatrixGroups);
 

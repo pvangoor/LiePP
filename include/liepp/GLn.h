@@ -71,7 +71,7 @@ template <int n, typename _Scalar = double> class GLn {
         do {
             M.setRandom();
             d = M.determinant();
-        } while (d == 0);
+        } while (abs(d) == 0);
         return GLn(M / d);
     }
 
