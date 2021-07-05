@@ -22,6 +22,7 @@
 #include "liepp/SLn.h"
 #include "liepp/SO3.h"
 #include "liepp/SOT3.h"
+#include "liepp/SOn.h"
 #include "gtest/gtest.h"
 
 #include <type_traits>
@@ -72,7 +73,7 @@ TEST(TestGroups, SO3FromVectors) {
 template <typename T> class MatrixGroupTest : public testing::Test {};
 
 using testing::Types;
-typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>, GLncd<3>> MatrixGroups;
+typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>, GLncd<3>, SOnd<4>> MatrixGroups;
 
 TYPED_TEST_SUITE(MatrixGroupTest, MatrixGroups);
 
