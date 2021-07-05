@@ -24,20 +24,23 @@ template <int n, typename _Scalar = double> class SLn {
     // The special linear group of n dimensions.
     // n by n matrices with determinant 1.
   public:
-    constexpr grpDim = n*n-1;
-    using MatrixAlgS = Eigen::Matrix<_Scalar, grpDim, grpDim>;
-    using VectorAlgS = Eigen::Matrix<_Scalar, grpDim, 1>;
+    constexpr static int grpDim = n*n-1;
     using VectorNS = Eigen::Matrix<_Scalar, n, 1>;
+    using MatrixNS = Eigen::Matrix<_Scalar, n, n>;
+    using VectorDS = Eigen::Matrix<_Scalar, grpDim, 1>;
+    using MatrixDS = Eigen::Matrix<_Scalar, grpDim, grpDim>;
 
-    static MatrixAlgS wedge(const VectorAlgS& u) {
-        MatrixAlgS M;
+    static MatrixNS wedge(const VectorDS& u) {
+        MatrixNS M;
         M(n-1,n-1) = 0.0;
         for (int i=0;i<n;++i) {
             for (int j=0;j<n;++j) {
-                M(i,j) = u(n*i+j);
+                if (n*i+j < grpDim) {
+                    M(i,j) = u(n*i+j);
 
-                if (i==j) {
-                    M(n-1,n-1) -= u(n*i+j);
+                    if (i==j) {
+                        M(n-1,n-1) -= u(n*i+j);
+                    }
                 }
             }
         }
@@ -45,8 +48,8 @@ template <int n, typename _Scalar = double> class SLn {
         return M;
     }
 
-    static VectorAlgS vex(const MatrixAlgS& M) { 
-        VectorAlgS u;
+    static VectorDS vee(const MatrixNS& M) { 
+        VectorDS u;
         for (int i=0;i<n;++i) {
             for (int j=0;j<n;++j) {
                 if (n*i+j < grpDim)
@@ -56,19 +59,27 @@ template <int n, typename _Scalar = double> class SLn {
         return u;
     }
 
-    static MatrixAlgS adjoint(const VectorAlgS& u);
-
-    static SLn exp(const VectorAlgS& u) {
-        return SLn(wedge(u).exp(u));
+    static MatrixDS adjoint(const VectorDS& u) {
+        const auto uWedge = wedge(u);
+        MatrixDS adMat;
+        for (int i=0;i<grpDim; ++i) {
+            const auto eiWedge = wedge(VectorDS::Unit(i));
+            adMat.template block<grpDim, 1>(0, i) = vee(uWedge * eiWedge - eiWedge * uWedge);
+        }
+        return adMat;
     }
 
-    static VectorAlgS log(const SLn& X) {
+    static SLn exp(const VectorDS& u) {
+        return SLn(wedge(u).exp());
+    }
+
+    static VectorDS log(const SLn& X) {
         return vee(X.asMatrix().log());
     }
 
-    static SLn Identity() { return SLn(MatrixAlgS::Identity()); }
+    static SLn Identity() { return SLn(MatrixNS::Identity()); }
     static SLn Random() {
-        MatrixAlgS M;
+        MatrixNS M;
         _Scalar d;
         do {
             M.setRandom();
@@ -78,24 +89,32 @@ template <int n, typename _Scalar = double> class SLn {
     }
 
     SLn() = default;
-    SLn(const MatrixAlgS& mat) { H = mat; }
+    SLn(const MatrixNS& mat) { H = mat; }
     SLn inverse() const { return SLn(H.inverse()); }
 
-    MatrixAlgS Adjoint() const;
+    MatrixDS Adjoint() const {
+        MatrixNS HInv = H.inverse();
+        MatrixDS AdMat;
+        for (int i=0;i<grpDim; ++i) {
+            const auto ei = VectorDS::Unit(i);
+            AdMat.template block<grpDim, 1>(0, i) = vee(H * wedge(ei) * HInv);
+        }
+        return AdMat;
+    }
 
-    void setIdentity() { H = MatrixAlgS::Identity(); }
-    VectorAlgS operator*(const VectorNS& point) const { return H * point; }
+    void setIdentity() { H = MatrixNS::Identity(); }
+    VectorDS operator*(const VectorNS& point) const { return H * point; }
     SLn operator*(const SLn& other) const { return SLn(H * other.H); }
-    VectorAlgS applyInverse(const VectorAlgS& point) const { return H.inverse() * point; }
+    VectorDS applyInverse(const VectorDS& point) const { return H.inverse() * point; }
 
     void invert() { H = H.inverse(); }
 
     // Set and get
-    MatrixAlgS asMatrix() const { return H; }
-    void fromMatrix(const MatrixAlgS& mat) { H = mat; }
+    MatrixNS asMatrix() const { return H; }
+    void fromMatrix(const MatrixNS& mat) { H = mat; }
 
   private:
-    MatrixAlgS H;
+    MatrixNS H;
 };
 
 typedef SLn<3, double> SL3d;

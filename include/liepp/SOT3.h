@@ -23,44 +23,44 @@
 template <typename _Scalar = double> class SOT3 {
   public:
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
-    using VectorAlgS = Eigen::Matrix<_Scalar, 4, 1>;
+    using VectorDS = Eigen::Matrix<_Scalar, 4, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
-    using MatrixAlgS = Eigen::Matrix<_Scalar, 4, 4>;
+    using MatrixNS = Eigen::Matrix<_Scalar, 4, 4>;
     using SO3S = SO3<_Scalar>;
 
-    static MatrixAlgS wedge(const VectorAlgS& u) {
-        MatrixAlgS U = MatrixAlgS::Zero();
+    static MatrixNS wedge(const VectorDS& u) {
+        MatrixNS U = MatrixNS::Zero();
         U.template block<3,3>(0,0) = SO3S::skew(u.template segment<3>(0));
         U(3,3) = u(3);
         return U;
     }
-    static VectorAlgS vee(const MatrixAlgS& U) {
-        VectorAlgS u;
+    static VectorDS vee(const MatrixNS& U) {
+        VectorDS u;
         u.template segment<3>(0) = SO3S::vex(U.template block<3, 3>(0,0));
         u(3) = U(3,3);
         return u;
     }
-    static SOT3 exp(const VectorAlgS& w) {
+    static SOT3 exp(const VectorDS& w) {
         SOT3 result;
         result.R = SO3S::exp(w.template block<3, 1>(0, 0));
         result.a = std::exp(w(3));
         return result;
     }
-    static VectorAlgS log(const SOT3& T) {
-        VectorAlgS result;
+    static VectorDS log(const SOT3& T) {
+        VectorDS result;
         result.template block<3, 1>(0, 0) = SO3S::log(T.R);
         result(3) = std::log(T.a);
         return result;
     }
 
-    static MatrixAlgS adjoint(const VectorAlgS& u) {
-        MatrixAlgS ad_u = MatrixAlgS::Zero();
+    static MatrixNS adjoint(const VectorDS& u) {
+        MatrixNS ad_u = MatrixNS::Zero();
         ad_u.template block<3,3>(0,0) = SO3S::skew(u.template segment<3>(0));
         return ad_u;
     }
 
-    MatrixAlgS Adjoint() const {
-        MatrixAlgS AdMatrix = MatrixAlgS::Identity();
+    MatrixNS Adjoint() const {
+        MatrixNS AdMatrix = MatrixNS::Identity();
         AdMatrix.template block<3,3>(0,0) = this->R.asMatrix();
         return AdMatrix;
     }
@@ -78,7 +78,7 @@ template <typename _Scalar = double> class SOT3 {
         this->R = R;
         this->a = a;
     }
-    SOT3(const MatrixAlgS& mat) {
+    SOT3(const MatrixNS& mat) {
         R.fromMatrix(mat.template block<3, 3>(0, 0));
         a = mat(3, 3);
     }
@@ -98,8 +98,8 @@ template <typename _Scalar = double> class SOT3 {
     SOT3 inverse() const { return SOT3(R.inverse(), 1.0 / a); }
 
     // Set and get
-    MatrixAlgS asMatrix() const {
-        MatrixAlgS result = MatrixAlgS::Identity();
+    MatrixNS asMatrix() const {
+        MatrixNS result = MatrixNS::Identity();
         result.template block<3, 3>(0, 0) = R.asMatrix();
         result(3, 3) = a;
         return result;

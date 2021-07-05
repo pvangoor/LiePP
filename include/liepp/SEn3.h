@@ -25,14 +25,14 @@ template <int n, typename _Scalar = double> class SEn3 {
   public:
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
-    using MatrixAlgS = Eigen::Matrix<_Scalar, 3+n, 3+n>;
-    using VectorAlgS = Eigen::Matrix<_Scalar, 3+3*n, 1>;
+    using MatrixNS = Eigen::Matrix<_Scalar, 3+n, 3+n>;
+    using VectorDS = Eigen::Matrix<_Scalar, 3+3*n, 1>;
     using MatrixGS = Eigen::Matrix<_Scalar, 3+3*n, 3+3*n>;
     using SO3S = SO3<_Scalar>;
 
-    static MatrixAlgS wedge(const VectorAlgS& u) {
+    static MatrixNS wedge(const VectorDS& u) {
         // u is in the format (omega, v_1, ..., v_n)
-        MatrixAlgS result;
+        MatrixNS result;
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template block<3, 1>(0, 0));
         for (int i=0;i<n;++i) {
             result.template block<3, 1>(0, 3+i) = u.template block<3, 1>(3+3*i, 0);
@@ -40,16 +40,16 @@ template <int n, typename _Scalar = double> class SEn3 {
         result.template block<n, 3+n>(3, 0) = Eigen::Matrix<_Scalar, n, 3+n>::Zero();
         return result;
     }
-    static VectorAlgS vee(const MatrixAlgS& U) {
+    static VectorDS vee(const MatrixNS& U) {
         // u is in the format (omega, v)
-        VectorAlgS result;
+        VectorDS result;
         result.template block<3, 1>(0, 0) = SO3S::vex(U.template block<3, 3>(0, 0));
         for (int i=0;i<n;++i) {
             result.template block<3, 1>(3+3*i, 0) = U.template block<3, 1>(0, 3+i);
         }
         return result;
     }
-    static MatrixGS adjoint(const VectorAlgS& u) {
+    static MatrixGS adjoint(const VectorDS& u) {
         // u is in the format (omega, v)
         MatrixGS result = MatrixGS::Zero();
         result.template block<3, 3>(0, 0) = SO3S::skew(u.template segment<3>(0));
@@ -59,7 +59,7 @@ template <int n, typename _Scalar = double> class SEn3 {
         }
         return result;
     }
-    static SEn3 exp(const VectorAlgS& u) {
+    static SEn3 exp(const VectorDS& u) {
         Vector3S w = u.template block<3, 1>(0, 0);
         std::array<Vector3S, n> v;
         for (int i=0; i<n; ++i) {
@@ -88,7 +88,7 @@ template <int n, typename _Scalar = double> class SEn3 {
 
         return result;
     }
-    static VectorAlgS log(const SEn3& P) {
+    static VectorDS log(const SEn3& P) {
         Matrix3S Omega = SO3S::skew(SO3S::log(P.R));
 
         _Scalar theta = SO3S::vex(Omega).norm();
@@ -99,7 +99,7 @@ template <int n, typename _Scalar = double> class SEn3 {
 
         Matrix3S VInv = Matrix3S::Identity() - 0.5 * Omega + coefficient * Omega * Omega;
 
-        VectorAlgS u = VectorAlgS::Zero();
+        VectorDS u = VectorDS::Zero();
         u.template segment<3>(0) = SO3S::vex(Omega);
         for (int i=0; i<n; ++i){
             u.template segment<3>(3+3*i) = VInv * P.x[i];
@@ -125,7 +125,7 @@ template <int n, typename _Scalar = double> class SEn3 {
         R = other.R;
         x = other.x;
     }
-    SEn3(const MatrixAlgS& mat) {
+    SEn3(const MatrixNS& mat) {
         R = SO3S(mat.template block<3, 3>(0, 0));
         for (int i=0;i<n;++i) {
             x[i] = mat.template block<3, 1>(0, 3+i);
@@ -184,8 +184,8 @@ template <int n, typename _Scalar = double> class SEn3 {
     }
 
     // Set and get
-    MatrixAlgS asMatrix() const {
-        MatrixAlgS result;
+    MatrixNS asMatrix() const {
+        MatrixNS result;
         result.setIdentity();
         result.template block<3, 3>(0, 0) = R.asMatrix();
         for (int i=0;i<n;++i){
@@ -193,7 +193,7 @@ template <int n, typename _Scalar = double> class SEn3 {
         }
         return result;
     }
-    void fromMatrix(const MatrixAlgS& mat) {
+    void fromMatrix(const MatrixNS& mat) {
         R.fromMatrix(mat.template block<3, 3>(0, 0));
         for (int i=0;i<n;++i){
             x[i] = mat.template block<3, 1>(0, 3+i);
