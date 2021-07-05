@@ -92,13 +92,71 @@ TYPED_TEST(MatrixGroupTest, TestWedgeVee) {
     }
 }
 
-// TYPED_TEST(MatrixGroupTest, TestMatrixForm) {
-//     // Test the matrix group exponential and logarithm
-//     for (int i = 0; i < 100; ++i) {
-//         typename TypeParam::VectorAlgS v = TypeParam::VectorAlgS::Random();
-//         typename TypeParam::MatrixAlgS vWedge = TypeParam::wedge(v);
-//         typename TypeParam::VectorAlgS vWedgeVee = TypeParam::vee(vWedge);
-//         double wedgeError = (vWedgeVee - v).norm();
-//         EXPECT_LE(wedgeError, 1e-8);
-//     }
-// }
+TYPED_TEST(MatrixGroupTest, TestAssociativity) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        TypeParam X1 = TypeParam::Random();
+        TypeParam X2 = TypeParam::Random();
+        TypeParam X3 = TypeParam::Random();
+
+        TypeParam Z1 = (X1 * X2) * X3;
+        TypeParam Z2 = X1 * (X2 * X3);
+        
+        testMatrixEquality(Z1.asMatrix(), Z2.asMatrix());
+    }
+}
+
+TYPED_TEST(MatrixGroupTest, TestIdentity) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        TypeParam X = TypeParam::Random();
+        TypeParam I = TypeParam::Identity();
+
+        TypeParam X1 = X * I;
+        TypeParam X2 = I * X;
+        
+        testMatrixEquality(X.asMatrix(), X1.asMatrix());
+        testMatrixEquality(X.asMatrix(), X2.asMatrix());
+    }
+}
+
+TYPED_TEST(MatrixGroupTest, TestInverse) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        TypeParam X = TypeParam::Random();
+        TypeParam XInv = X.inverse();
+        TypeParam I = TypeParam::Identity();
+
+        TypeParam I1 = X * XInv;
+        TypeParam I2 = XInv * X;
+        
+        testMatrixEquality(I.asMatrix(), I1.asMatrix());
+        testMatrixEquality(I.asMatrix(), I2.asMatrix());
+    }
+}
+
+TYPED_TEST(MatrixGroupTest, TestGroupAdjoint) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        TypeParam X = TypeParam::Random();
+        typename TypeParam::VectorAlgS U = TypeParam::VectorAlgS::Random();
+        
+        typename TypeParam::MatrixAlgS Ad_XU1 = TypeParam::wedge(X.Adjoint() * U);
+        typename TypeParam::MatrixAlgS Ad_XU2 = X.asMatrix() * TypeParam::wedge(U) * X.inverse().asMatrix();
+        
+        testMatrixEquality(Ad_XU1, Ad_XU2);
+    }
+}
+
+TYPED_TEST(MatrixGroupTest, TestAlgebraAdjoint) {
+    // Test the matrix group exponential and logarithm
+    for (int i = 0; i < 100; ++i) {
+        typename TypeParam::VectorAlgS V = TypeParam::VectorAlgS::Random();
+        typename TypeParam::VectorAlgS U = TypeParam::VectorAlgS::Random();
+        
+        typename TypeParam::MatrixAlgS ad_VU1 = TypeParam::wedge(TypeParam::adjoint(V) * U);
+        typename TypeParam::MatrixAlgS ad_VU2 = TypeParam::wedge(V) * TypeParam::wedge(U) - TypeParam::wedge(U) * TypeParam::wedge(V);
+        
+        testMatrixEquality(ad_VU1, ad_VU2);
+    }
+}

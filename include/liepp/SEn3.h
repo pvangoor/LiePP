@@ -168,7 +168,7 @@ template <int n, typename _Scalar = double> class SEn3 {
         SEn3 result;
         result.R = R.inverse();
         for (int i=0;i<n;++i){
-            result.x[i] = - result.R * x[i];
+            result.x[i] = - (result.R * x[i]);
         }
         return result;
     }

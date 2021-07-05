@@ -33,6 +33,8 @@ template <typename _Scalar = double> class SO3 {
     static VectorAlgS vex(const MatrixAlgS& M) { return (VectorAlgS() << M(2, 1), M(0, 2), M(1, 0)).finished(); }
     static VectorAlgS vee(const MatrixAlgS& M) {return vex(M);}
 
+    static MatrixAlgS adjoint(const VectorAlgS& Omega) { return skew(Omega); }
+
     static SO3 exp(const VectorAlgS& w) {
         _Scalar theta = w.norm() / 2.0;
         QuaternionS result;
@@ -63,6 +65,7 @@ template <typename _Scalar = double> class SO3 {
     SO3(const MatrixAlgS& mat) { quaternion = mat; }
     SO3(const QuaternionS& quat) { quaternion = quat; }
     SO3 inverse() const { return SO3(quaternion.inverse()); }
+    MatrixAlgS Adjoint() const { return this->asMatrix(); }
 
     void setIdentity() { quaternion = QuaternionS::Identity(); }
     VectorAlgS operator*(const VectorAlgS& point) const { return quaternion * point; }

@@ -52,12 +52,25 @@ template <typename _Scalar = double> class SOT3 {
         result(3) = std::log(T.a);
         return result;
     }
+
+    static MatrixAlgS adjoint(const VectorAlgS& u) {
+        MatrixAlgS ad_u = MatrixAlgS::Zero();
+        ad_u.template block<3,3>(0,0) = SO3S::skew(u.template segment<3>(0));
+        return ad_u;
+    }
+
+    MatrixAlgS Adjoint() const {
+        MatrixAlgS AdMatrix = MatrixAlgS::Identity();
+        AdMatrix.template block<3,3>(0,0) = this->R.asMatrix();
+        return AdMatrix;
+    }
+
     static SOT3 Identity() {
         SOT3 Q;
         Q.setIdentity();
         return Q;
     }
-    static SOT3 Random() { return SOT3( SO3S::Random(), exp(_Scalar(rand() / RAND_MAX)) ); }
+    static SOT3 Random() { return SOT3( SO3S::Random(), std::exp(_Scalar(rand() / RAND_MAX)) ); }
 
     SOT3() = default;
     SOT3(const SOT3& other) = default;
