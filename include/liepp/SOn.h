@@ -21,9 +21,9 @@
 
 template <int n, typename _Scalar = double> class SOn {
   public:
-    constexpr static int grpDim = (n * (n - 1)) / 2;
-    using VectorDS = Eigen::Matrix<_Scalar, grpDim, 1>;
-    using MatrixDS = Eigen::Matrix<_Scalar, grpDim, grpDim>;
+    constexpr static int CDim = (n * (n - 1)) / 2;
+    using VectorDS = Eigen::Matrix<_Scalar, CDim, 1>;
+    using MatrixDS = Eigen::Matrix<_Scalar, CDim, CDim>;
     using MatrixNS = Eigen::Matrix<_Scalar, n, n>;
     using VectorNS = Eigen::Matrix<_Scalar, n, 1>;
 
@@ -31,7 +31,7 @@ template <int n, typename _Scalar = double> class SOn {
         MatrixNS vWedge = MatrixNS::Zero();
         int i = 0;
         int j = 0;
-        for (int k = 0; k < grpDim; ++k) {
+        for (int k = 0; k < CDim; ++k) {
             if (++j >= n) {
                 ++i;
                 j = i + 1;
@@ -45,7 +45,7 @@ template <int n, typename _Scalar = double> class SOn {
         VectorDS v;
         int i = 0;
         int j = 0;
-        for (int k = 0; k < grpDim; ++k) {
+        for (int k = 0; k < CDim; ++k) {
             if (++j >= n) {
                 ++i;
                 j = i + 1;
@@ -58,9 +58,9 @@ template <int n, typename _Scalar = double> class SOn {
     static MatrixDS adjoint(const VectorDS& u) {
         const auto uWedge = wedge(u);
         MatrixDS adMat;
-        for (int i = 0; i < grpDim; ++i) {
+        for (int i = 0; i < CDim; ++i) {
             const auto eiWedge = wedge(VectorDS::Unit(i));
-            adMat.template block<grpDim, 1>(0, i) = vee(uWedge * eiWedge - eiWedge * uWedge);
+            adMat.template block<CDim, 1>(0, i) = vee(uWedge * eiWedge - eiWedge * uWedge);
         }
         return adMat;
     }
@@ -87,9 +87,9 @@ template <int n, typename _Scalar = double> class SOn {
     MatrixDS Adjoint() const {
         MatrixNS RT = R.transpose();
         MatrixDS AdMat;
-        for (int i = 0; i < grpDim; ++i) {
+        for (int i = 0; i < CDim; ++i) {
             const auto ei = VectorDS::Unit(i);
-            AdMat.template block<grpDim, 1>(0, i) = vee(R * wedge(ei) * RT);
+            AdMat.template block<CDim, 1>(0, i) = vee(R * wedge(ei) * RT);
         }
         return AdMat;
     }

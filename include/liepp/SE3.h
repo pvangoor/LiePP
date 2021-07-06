@@ -22,7 +22,7 @@
 
 template <typename _Scalar = double> class SE3 {
   public:
-    constexpr static int grpDim = 6;
+    constexpr static int CDim = 6;
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
     using MatrixNS = Eigen::Matrix<_Scalar, 4, 4>;

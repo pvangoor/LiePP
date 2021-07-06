@@ -24,18 +24,18 @@ template <int n, typename _Scalar = double> class SLn {
     // The special linear group of n dimensions.
     // n by n matrices with determinant 1.
   public:
-    constexpr static int grpDim = n * n - 1;
+    constexpr static int CDim = n * n - 1;
     using VectorNS = Eigen::Matrix<_Scalar, n, 1>;
     using MatrixNS = Eigen::Matrix<_Scalar, n, n>;
-    using VectorDS = Eigen::Matrix<_Scalar, grpDim, 1>;
-    using MatrixDS = Eigen::Matrix<_Scalar, grpDim, grpDim>;
+    using VectorDS = Eigen::Matrix<_Scalar, CDim, 1>;
+    using MatrixDS = Eigen::Matrix<_Scalar, CDim, CDim>;
 
     static MatrixNS wedge(const VectorDS& u) {
         MatrixNS M;
         M(n - 1, n - 1) = 0.0;
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
-                if (n * i + j < grpDim) {
+                if (n * i + j < CDim) {
                     M(i, j) = u(n * i + j);
 
                     if (i == j) {
@@ -52,7 +52,7 @@ template <int n, typename _Scalar = double> class SLn {
         VectorDS u;
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
-                if (n * i + j < grpDim)
+                if (n * i + j < CDim)
                     u(n * i + j) = M(i, j);
             }
         }
@@ -62,9 +62,9 @@ template <int n, typename _Scalar = double> class SLn {
     static MatrixDS adjoint(const VectorDS& u) {
         const auto uWedge = wedge(u);
         MatrixDS adMat;
-        for (int i = 0; i < grpDim; ++i) {
+        for (int i = 0; i < CDim; ++i) {
             const auto eiWedge = wedge(VectorDS::Unit(i));
-            adMat.template block<grpDim, 1>(0, i) = vee(uWedge * eiWedge - eiWedge * uWedge);
+            adMat.template block<CDim, 1>(0, i) = vee(uWedge * eiWedge - eiWedge * uWedge);
         }
         return adMat;
     }
@@ -91,9 +91,9 @@ template <int n, typename _Scalar = double> class SLn {
     MatrixDS Adjoint() const {
         MatrixNS HInv = H.inverse();
         MatrixDS AdMat;
-        for (int i = 0; i < grpDim; ++i) {
+        for (int i = 0; i < CDim; ++i) {
             const auto ei = VectorDS::Unit(i);
-            AdMat.template block<grpDim, 1>(0, i) = vee(H * wedge(ei) * HInv);
+            AdMat.template block<CDim, 1>(0, i) = vee(H * wedge(ei) * HInv);
         }
         return AdMat;
     }

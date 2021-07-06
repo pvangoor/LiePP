@@ -23,12 +23,12 @@
 
 template <int n, typename _Scalar = double> class SEn3 {
   public:
-    constexpr static int grpDim = 3 + 3 * n;
+    constexpr static int CDim = 3 + 3 * n;
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
     using MatrixNS = Eigen::Matrix<_Scalar, 3 + n, 3 + n>;
-    using VectorDS = Eigen::Matrix<_Scalar, grpDim, 1>;
-    using MatrixDS = Eigen::Matrix<_Scalar, grpDim, grpDim>;
+    using VectorDS = Eigen::Matrix<_Scalar, CDim, 1>;
+    using MatrixDS = Eigen::Matrix<_Scalar, CDim, CDim>;
     using SO3S = SO3<_Scalar>;
 
     static MatrixNS wedge(const VectorDS& u) {
