@@ -19,7 +19,7 @@
 
 #include "eigen3/Eigen/Dense"
 
-#ifdef __cpp_concepts
+#if __cpp_concepts >= 201907
 template <typename G> concept isLieGroup = requires {
     { G::CDim }
     ->std::same_as<const int&>; // G must have a const int labelled CDim
