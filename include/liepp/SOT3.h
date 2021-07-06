@@ -22,6 +22,8 @@
 
 template <typename _Scalar = double> class SOT3 {
   public:
+    using Scalar = _Scalar;
+    constexpr static int CDim = 4;
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
     using MatrixNS = Eigen::Matrix<_Scalar, 4, 4>;
@@ -112,6 +114,7 @@ template <typename _Scalar = double> class SOT3 {
 
     SO3S R;
     _Scalar a;
+    static_assert(isLieGroup<SOT3<_Scalar>>);
 };
 
 using SOT3d = SOT3<double>;

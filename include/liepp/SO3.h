@@ -83,7 +83,6 @@ template <typename _Scalar = double> class SO3 {
     void fromMatrix(const MatrixDS& mat) { quaternion = mat; }
     void fromQuaternion(const QuaternionS& quat) { quaternion = quat; }
 
-  private:
     QuaternionS quaternion;
     static_assert(isLieGroup<SO3<_Scalar>>);
 };

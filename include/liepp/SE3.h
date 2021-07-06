@@ -18,10 +18,10 @@
 #pragma once
 
 #include "SO3.h"
-#include "eigen3/Eigen/Dense"
 
 template <typename _Scalar = double> class SE3 {
   public:
+    using Scalar = _Scalar;
     constexpr static int CDim = 6;
     using Vector3S = Eigen::Matrix<_Scalar, 3, 1>;
     using Matrix3S = Eigen::Matrix<_Scalar, 3, 3>;
@@ -154,6 +154,8 @@ template <typename _Scalar = double> class SE3 {
 
     SO3S R;
     Vector3S x;
+
+    static_assert(isLieGroup<SE3<_Scalar>>);
 };
 
 using SE3d = SE3<double>;

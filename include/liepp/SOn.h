@@ -106,7 +106,6 @@ template <int n, typename _Scalar = double> class SOn {
     MatrixNS asMatrix() const { return R; }
     void fromMatrix(const MatrixNS& mat) { R = mat; }
 
-  private:
     MatrixNS R;
     static_assert(isLieGroup<SOn<n, _Scalar>>);
 };

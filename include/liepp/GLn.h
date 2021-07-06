@@ -17,13 +17,14 @@
 
 #pragma once
 
-#include "eigen3/Eigen/Dense"
+#include "LieGroup.h"
 #include "eigen3/unsupported/Eigen/MatrixFunctions"
 
 template <int n, typename _Scalar = double> class GLn {
     // The special linear group of n dimensions.
     // n by n matrices with determinant 1.
   public:
+    using Scalar = _Scalar;
     constexpr static int CDim = n * n;
     using VectorNS = Eigen::Matrix<_Scalar, n, 1>;
     using MatrixNS = Eigen::Matrix<_Scalar, n, n>;
@@ -100,7 +101,7 @@ template <int n, typename _Scalar = double> class GLn {
     MatrixNS asMatrix() const { return A; }
     void fromMatrix(const MatrixNS& mat) { A = mat; }
 
-  private:
+    static_assert(isLieGroup<GLn<n, _Scalar>>);
     MatrixNS A;
 };
 
