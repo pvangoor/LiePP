@@ -19,6 +19,7 @@
 
 #include "eigen3/Eigen/Dense"
 
+#ifdef __cpp_concepts
 template <typename G> concept isLieGroup = requires {
     { G::CDim }
     ->std::same_as<const int&>; // G must have a const int labelled CDim
@@ -49,3 +50,6 @@ template <typename G> concept isLieGroup = requires {
     { &G::inverse }
     ->std::same_as<G (G::*)() const>;
 };
+#else
+template <typename G> const bool isLieGroup = true;
+#endif
