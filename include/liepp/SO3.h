@@ -17,10 +17,12 @@
 
 #pragma once
 
-#include "eigen3/Eigen/Dense"
+#include "LieGroup.h"
 
 template <typename _Scalar = double> class SO3 {
   public:
+    using Scalar = _Scalar;
+    constexpr static int CDim = 3;
     using VectorDS = Eigen::Matrix<_Scalar, 3, 1>;
     using MatrixDS = Eigen::Matrix<_Scalar, 3, 3>;
     using MatrixNS = Eigen::Matrix<_Scalar, 3, 3>;
@@ -83,9 +85,10 @@ template <typename _Scalar = double> class SO3 {
 
   private:
     QuaternionS quaternion;
+    static_assert(isLieGroup<SO3<_Scalar>>);
 };
 
 using SO3d = SO3<double>;
 using SO3f = SO3<float>;
-using SO3cd = SO3<Eigen::dcomplex>;
-using SO3cf = SO3<Eigen::scomplex>;
+// using SO3cd = SO3<Eigen::dcomplex>;
+// using SO3cf = SO3<Eigen::scomplex>;

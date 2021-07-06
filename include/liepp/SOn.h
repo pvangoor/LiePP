@@ -17,10 +17,11 @@
 
 #pragma once
 
-#include "eigen3/Eigen/Dense"
+#include "LieGroup.h"
 
 template <int n, typename _Scalar = double> class SOn {
   public:
+    using Scalar = _Scalar;
     constexpr static int CDim = (n * (n - 1)) / 2;
     using VectorDS = Eigen::Matrix<_Scalar, CDim, 1>;
     using MatrixDS = Eigen::Matrix<_Scalar, CDim, CDim>;
@@ -107,6 +108,7 @@ template <int n, typename _Scalar = double> class SOn {
 
   private:
     MatrixNS R;
+    static_assert(isLieGroup<SOn<n, _Scalar>>);
 };
 
 template <int n> using SOnd = SOn<n, double>;

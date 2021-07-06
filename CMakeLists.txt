@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(LiePP VERSION 1.0)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
+
+set(CMAKE_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
 
 add_library(liepp INTERFACE)
 
