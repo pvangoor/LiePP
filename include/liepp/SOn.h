@@ -19,6 +19,8 @@
 
 #include "LieGroup.h"
 
+namespace liepp {
+
 template <int n, typename _Scalar = double> class SOn {
   public:
     using Scalar = _Scalar;
@@ -114,3 +116,5 @@ template <int n> using SOnd = SOn<n, double>;
 template <int n> using SOnf = SOn<n, float>;
 template <int n> using SOncd = SOn<n, Eigen::dcomplex>;
 template <int n> using SOncf = SOn<n, Eigen::scomplex>;
+
+}

@@ -20,6 +20,8 @@
 #include "SO3.h"
 #include <array>
 
+namespace liepp {
+
 template <int n, typename _Scalar = double> class SEn3 {
   public:
     using Scalar = _Scalar;
@@ -215,3 +217,5 @@ using SE23d = SEn3<2, double>;
 using SE23f = SEn3<2, float>;
 using SE23cd = SEn3<2, Eigen::dcomplex>;
 using SE23cf = SEn3<2, Eigen::scomplex>;
+
+}

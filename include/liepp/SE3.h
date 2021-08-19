@@ -19,6 +19,8 @@
 
 #include "SO3.h"
 
+namespace liepp {
+
 template <typename _Scalar = double> class SE3 {
   public:
     using Scalar = _Scalar;
@@ -167,3 +169,5 @@ using se3d = Eigen::Matrix<double, 6, 1>;
 using se3f = Eigen::Matrix<float, 6, 1>;
 using se3cd = Eigen::Matrix<Eigen::dcomplex, 6, 1>;
 using se3cf = Eigen::Matrix<Eigen::scomplex, 6, 1>;
+
+}

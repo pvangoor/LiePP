@@ -20,6 +20,8 @@
 #include "SO3.h"
 #include "eigen3/Eigen/Dense"
 
+namespace liepp {
+
 template <typename _Scalar = double> class SOT3 {
   public:
     using Scalar = _Scalar;
@@ -121,3 +123,5 @@ using SOT3d = SOT3<double>;
 using SOT3f = SOT3<float>;
 using SOT3cd = SOT3<Eigen::dcomplex>;
 using SOT3cf = SOT3<Eigen::scomplex>;
+
+}

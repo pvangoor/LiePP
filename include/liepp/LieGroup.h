@@ -19,37 +19,32 @@
 
 #include "eigen3/Eigen/Dense"
 
+namespace liepp {
+
 #if __cpp_concepts >= 201907
-template <typename G> concept isLieGroup = requires {
-    { G::CDim }
-    ->std::same_as<const int&>; // G must have a const int labelled CDim
-    { typename G::MatrixDS() }
-    ->std::same_as<Eigen::Matrix<typename G::Scalar, G::CDim, G::CDim>>;
-    { typename G::VectorDS() }
-    ->std::same_as<Eigen::Matrix<typename G::Scalar, G::CDim, 1>>;
+template <typename G>
+concept isLieGroup = requires {
+    { G::CDim } -> std::same_as<const int&>; // G must have a const int labelled CDim
+    { typename G::MatrixDS() } -> std::same_as<Eigen::Matrix<typename G::Scalar, G::CDim, G::CDim>>;
+    { typename G::VectorDS() } -> std::same_as<Eigen::Matrix<typename G::Scalar, G::CDim, 1>>;
 
     // { G::wedge }
     // ->std::same_as<typename G::MatrixDS (&)(const typename G::VectorDS&)>;
     // { G::vee }
     // ->std::same_as<typename G::VectorDS (&)(const typename G::MatrixDS&)>;
 
-    { G::exp }
-    ->std::same_as<G (&)(const typename G::VectorDS&)>;
-    { G::log }
-    ->std::same_as<typename G::VectorDS (&)(const G&)>;
+    { G::exp } -> std::same_as<G (&)(const typename G::VectorDS&)>;
+    { G::log } -> std::same_as<typename G::VectorDS (&)(const G&)>;
 
-    { G::adjoint }
-    ->std::same_as<typename G::MatrixDS (&)(const typename G::VectorDS&)>;
-    { &G::Adjoint }
-    ->std::same_as<typename G::MatrixDS (G::*)() const>;
+    { G::adjoint } -> std::same_as<typename G::MatrixDS (&)(const typename G::VectorDS&)>;
+    { &G::Adjoint } -> std::same_as<typename G::MatrixDS (G::*)() const>;
 
-    { static_cast<G (G::*)(const G&) const>(&G::operator*) }
-    ->std::same_as<G (G::*)(const G&) const>;
-    { G::Identity }
-    ->std::same_as<G (&)()>;
-    { &G::inverse }
-    ->std::same_as<G (G::*)() const>;
+    { static_cast<G (G::*)(const G&) const>(&G::operator*) } -> std::same_as<G (G::*)(const G&) const>;
+    { G::Identity } -> std::same_as<G (&)()>;
+    { &G::inverse } -> std::same_as<G (G::*)() const>;
 };
 #else
 template <typename G> const bool isLieGroup = true;
 #endif
+
+} // namespace liepp

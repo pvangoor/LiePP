@@ -19,6 +19,8 @@
 
 #include "LieGroup.h"
 
+namespace liepp {
+
 template <typename _Scalar = double> class SO3 {
   public:
     using Scalar = _Scalar;
@@ -91,3 +93,5 @@ using SO3d = SO3<double>;
 using SO3f = SO3<float>;
 // using SO3cd = SO3<Eigen::dcomplex>;
 // using SO3cf = SO3<Eigen::scomplex>;
+
+}

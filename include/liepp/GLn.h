@@ -20,6 +20,8 @@
 #include "LieGroup.h"
 #include "eigen3/unsupported/Eigen/MatrixFunctions"
 
+namespace liepp {
+
 template <int n, typename _Scalar = double> class GLn {
     // The special linear group of n dimensions.
     // n by n matrices with determinant 1.
@@ -109,3 +111,5 @@ template <int n> using GLnd = GLn<n, double>;
 template <int n> using GLnf = GLn<n, float>;
 template <int n> using GLncd = GLn<n, Eigen::dcomplex>;
 template <int n> using GLncf = GLn<n, Eigen::scomplex>;
+
+} // namespace liepp

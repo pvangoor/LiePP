@@ -31,6 +31,7 @@ template <class T> struct is_complex<std::complex<T>> : std::true_type {};
 
 using namespace std;
 using namespace Eigen;
+using namespace liepp;
 
 template <typename _Scalar, std::enable_if_t<is_complex<_Scalar>::value, bool> = true>
 void expectNear(const _Scalar& a, const _Scalar& b, const double abs_error = 1e-8) {
