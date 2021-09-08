@@ -106,10 +106,7 @@ template <typename _Scalar = double> class SE3 {
     static SE3 Random() { return SE3(SO3S::Random(), Vector3S::Random()); }
 
     SE3() = default;
-    SE3(const SE3& other) {
-        R = other.R;
-        x = other.x;
-    }
+    SE3(const SE3& other) = default;
     SE3(const MatrixNS& mat) {
         R = SO3S(mat.template block<3, 3>(0, 0));
         x = mat.template block<3, 1>(0, 3);
