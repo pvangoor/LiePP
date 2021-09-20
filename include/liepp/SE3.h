@@ -89,7 +89,7 @@ template <typename _Scalar = double> class SE3 {
 
         _Scalar theta = SO3S::vex(Omega).norm();
         _Scalar coefficient = 1.0 / 12.0;
-        if (abs(theta) > 1e-8) {
+        if (abs(theta) > 1e-6) {
             coefficient = 1 / (theta * theta) * (1 - (theta * sin(theta)) / (2 * (1 - cos(theta))));
         }
 
