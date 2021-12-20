@@ -11,8 +11,6 @@ namespace liepp {
 template <typename... Groups> class ProductGroup {
     protected:
     static_assert((isLieGroup<Groups> && ...));
-    // template<int N> int truncatedCDim = std::tuple_element<N, std::tuple<Groups...>>::type::Scalar + truncatedCDim<N-1>;
-    // template<> int trucatedCDim<-1> = 0;
     template<int n>
     constexpr int TruncatedCDim() {
         constexpr int CDimN = std::tuple_element<n, std::tuple<Groups...>>::type::CDim;
@@ -20,7 +18,7 @@ template <typename... Groups> class ProductGroup {
     }
     template<size_t N>
     using GroupTypeN = typename std::tuple_element<N, std::tuple<Groups...>>::type;
-    
+
     public:
     using Scalar = std::tuple_element<0, std::tuple<Groups...>>::type::Scalar;
     constexpr static int CDim = (Groups::CDim + ...);
@@ -69,12 +67,18 @@ template <typename... Groups> class ProductGroup {
     }
 
     static VectorDS log(const ProductGroup& X) {
-        // MatrixDS R = rotation.asMatrix();
-        // _Scalar theta = acos((R.trace() - 1.0) / 2.0);
-        // _Scalar coefficient = (abs(theta) >= 1e-6) ? theta / (2.0 * sin(theta)) : 0.5;
+        const VectorDS& U = [X]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
+            return (VectorDS() << (GroupTypeN<Idx>::log(std::get<Idx>(X.X)), ...)).finished();
+            }(std::make_index_sequence<sizeof...(Groups)>());
+        return U;
+    }
 
-        // MatrixDS Omega = coefficient * (R - R.transpose());
-        // return vex(Omega);
+    MatrixDS Adjoint() const {
+        MatrixDS Ad = MatrixDS::Zero();
+        std::apply([Ad, this]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
+            ((Ad.block<GroupTypeN<Idx>::CDim,GroupTypeN<Idx>::CDim>(TruncatedCDim<Idx-1>(), TruncatedCDim<Idx-1>())
+                = std::get<Idx>(X.X).Adjoint()), ...);}, std::make_index_sequence<sizeof...(Groups)>());
+        return Ad;
     }
 
 
