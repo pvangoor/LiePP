@@ -15,11 +15,7 @@ template <typename... Groups> class ProductGroup {
     static_assert((isLieGroup<Groups> && ...));
     template<size_t N>
     using GroupTypeN = typename std::tuple_element<N, std::tuple<Groups...>>::type;
-    template<int n>
-    static constexpr int TruncatedCDim() {
-        constexpr int CDimN = std::tuple_element<n, std::tuple<Groups...>>::type::CDim;
-        return (n == -1) ? 0 : CDimN + TruncatedCDim<n-1>();
-    }
+
     template<size_t n>
     static constexpr int ZeroIndexDim() {
         if constexpr (n == 0) {
@@ -72,14 +68,16 @@ template <typename... Groups> class ProductGroup {
         ProductGroup result;
         constexpr size_t n = sizeof...(Groups);
         result.X = [U]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
-            return std::make_tuple(GroupTypeN<Idx>::exp(U.segment<TruncatedCDim<Idx>()>(TruncatedCDim<Idx-1>())) ...);
+            return std::make_tuple(GroupTypeN<Idx>::exp(U.template segment<GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>())) ...);
             }(std::make_index_sequence<sizeof...(Groups)>());
         return result;
     }
 
     static VectorDS log(const ProductGroup& X) {
-        const VectorDS& U = [X]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
-            return (VectorDS() << (GroupTypeN<Idx>::log(std::get<Idx>(X.X)), ...)).finished();
+        VectorDS U;
+        [&U, &X]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
+            ((U.template segment<GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>())
+                = GroupTypeN<Idx>::log(std::get<Idx>(X.X))), ...);
             }(std::make_index_sequence<sizeof...(Groups)>());
         return U;
     }
@@ -91,20 +89,16 @@ template <typename... Groups> class ProductGroup {
             ((Ad.template block<GroupTypeN<Idx>::CDim, GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>(), ZeroIndexDim<Idx>())
                 = std::get<Idx>(this->X).Adjoint()), ...);
             }(std::make_index_sequence<sizeof...(Groups)>());
-        // [&Ad, this]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
-        //     ((Ad.template block<GroupTypeN<Idx>::CDim, GroupTypeN<Idx>::CDim>(0,0)
-        //         = std::get<Idx>(this->X).Adjoint()), ...);}(std::make_index_sequence<sizeof...(Groups)>());
-        // [&Ad, this]<size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
-        //     ((Ad(0,0) = GroupTypeN<Idx>::CDim), ...);}(std::make_index_sequence<sizeof...(Groups)>());
         return Ad;
     }
 
     static MatrixDS adjoint(const VectorDS& U) {
         MatrixDS ad = MatrixDS::Zero();
-        std::apply([ad, U]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
-            ((ad.block<GroupTypeN<Idx>::CDim,GroupTypeN<Idx>::CDim>(TruncatedCDim<Idx-1>(), TruncatedCDim<Idx-1>())
-                = GroupTypeN<Idx>::adjoint(U.segment<TruncatedCDim<Idx>()>(TruncatedCDim<Idx-1>()))), ...);},
-                std::make_index_sequence<sizeof...(Groups)>());
+        std::cout << ZeroIndexDim<2>() << std::endl;
+        [&ad, &U]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
+            ((ad.template block<GroupTypeN<Idx>::CDim, GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>(), ZeroIndexDim<Idx>())
+                = GroupTypeN<Idx>::adjoint(U.template segment<GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>()))), ...);
+            }(std::make_index_sequence<sizeof...(Groups)>());
         return ad;
     }
 
