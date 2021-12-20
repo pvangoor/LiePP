@@ -7,6 +7,7 @@ endif()
 
 set(TESTS_LIST
     test_groups
+    test_products
 )
 
 foreach(TEST_NAME ${TESTS_LIST})
