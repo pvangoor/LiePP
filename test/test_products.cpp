@@ -30,4 +30,9 @@ TEST(TestGroups, ProductGroupInstantiations) {
     testMatrixEquality(std::get<0>(X3.X).asMatrix(), R3.asMatrix());
     testMatrixEquality(std::get<1>(X3.X).asMatrix(), H3.asMatrix());
     testMatrixEquality(std::get<2>(X3.X).asMatrix(), P3.asMatrix());
+
+    decltype(X1)::MatrixDS Ad1 = X1.Adjoint();
+    testMatrixEquality<double, liepp::SO3d::CDim,liepp::SO3d::CDim>(Ad1.block<liepp::SO3d::CDim,liepp::SO3d::CDim>(0,0), R1.Adjoint());
+    testMatrixEquality<double, liepp::SL3d::CDim,liepp::SL3d::CDim>(Ad1.block<liepp::SL3d::CDim,liepp::SL3d::CDim>(liepp::SO3d::CDim,liepp::SO3d::CDim), H1.Adjoint());
+    testMatrixEquality<double, liepp::SE3d::CDim,liepp::SE3d::CDim>(Ad1.block<liepp::SE3d::CDim,liepp::SE3d::CDim>(liepp::SO3d::CDim+liepp::SL3d::CDim,liepp::SO3d::CDim+liepp::SL3d::CDim),P1.Adjoint());
 }
