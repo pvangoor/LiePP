@@ -6,8 +6,6 @@
 #include <utility>
 #include <array>
 
-#include <iostream>
-
 namespace liepp {
 
 template <typename... Groups> class ProductGroup {
@@ -84,7 +82,6 @@ template <typename... Groups> class ProductGroup {
 
     MatrixDS Adjoint() const {
         MatrixDS Ad = MatrixDS::Zero();
-        std::cout << ZeroIndexDim<2>() << std::endl;
         [&Ad, this]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
             ((Ad.template block<GroupTypeN<Idx>::CDim, GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>(), ZeroIndexDim<Idx>())
                 = std::get<Idx>(this->X).Adjoint()), ...);
@@ -94,7 +91,6 @@ template <typename... Groups> class ProductGroup {
 
     static MatrixDS adjoint(const VectorDS& U) {
         MatrixDS ad = MatrixDS::Zero();
-        std::cout << ZeroIndexDim<2>() << std::endl;
         [&ad, &U]<std::size_t ... Idx>(std::integer_sequence<size_t, Idx...>) {
             ((ad.template block<GroupTypeN<Idx>::CDim, GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>(), ZeroIndexDim<Idx>())
                 = GroupTypeN<Idx>::adjoint(U.template segment<GroupTypeN<Idx>::CDim>(ZeroIndexDim<Idx>()))), ...);
@@ -103,6 +99,7 @@ template <typename... Groups> class ProductGroup {
     }
 
 
+        static_assert(isLieGroup<ProductGroup<Groups...>>);
     };
 
 }; // namespace liepp
