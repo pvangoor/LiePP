@@ -72,6 +72,10 @@ template <typename _Scalar = double> class SO3 {
     SO3 inverse() const { return SO3(quaternion.inverse()); }
     MatrixDS Adjoint() const { return this->asMatrix(); }
 
+    template <typename _Scalar2> SO3<_Scalar2> cast() const {
+        return SO3<_Scalar2>(quaternion.template cast<_Scalar2>());
+    }
+
     void setIdentity() { quaternion = QuaternionS::Identity(); }
     VectorDS operator*(const VectorDS& point) const { return quaternion * point; }
     SO3 operator*(const SO3& other) const { return SO3(quaternion * other.quaternion); }
@@ -94,4 +98,4 @@ using SO3f = SO3<float>;
 // using SO3cd = SO3<Eigen::dcomplex>;
 // using SO3cf = SO3<Eigen::scomplex>;
 
-}
+} // namespace liepp
