@@ -43,7 +43,7 @@ template <typename _Scalar = double> class SO3 {
     static SO3 exp(const VectorDS& w) {
         _Scalar theta = w.norm() / _Scalar(2.0);
         QuaternionS result;
-        if (theta > _Scalar(0.0)) {
+        if (theta > 0.0) {
             result.w() = cos(theta);
             result.vec() = sin(theta) * w.normalized();
         } else {
@@ -56,7 +56,7 @@ template <typename _Scalar = double> class SO3 {
     static VectorDS log(const SO3& rotation) {
         MatrixDS R = rotation.asMatrix();
         _Scalar theta = acos((R.trace() - 1.0) / 2.0);
-        _Scalar coefficient = (abs(theta) >= 1e-6) ? theta / (2.0 * sin(theta)) : 0.5;
+        _Scalar coefficient = (abs(theta) > 1e-6) ? theta / (2.0 * sin(theta)) : 0.5;
 
         MatrixDS Omega = coefficient * (R - R.transpose());
         return vex(Omega);

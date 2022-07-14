@@ -61,7 +61,7 @@ template <typename _Scalar = double> class SE3 {
 
         _Scalar th = w.norm();
         _Scalar A, B, C;
-        if (abs(th) >= 1e-12) {
+        if (abs(th) > 1e-12) {
             A = sin(th) / th;
             B = (1 - cos(th)) / pow(th, 2);
             C = (1 - A) / pow(th, 2);
@@ -93,7 +93,7 @@ template <typename _Scalar = double> class SE3 {
             coefficient = 1 / (theta * theta) * (1 - (theta * sin(theta)) / (2 * (1 - cos(theta))));
         }
 
-        Matrix3S VInv = Matrix3S::Identity() - 0.5 * Omega + coefficient * Omega * Omega;
+        Matrix3S VInv = Matrix3S::Identity() - Scalar(0.5) * Omega + coefficient * Omega * Omega;
         Vector3S v = VInv * x;
 
         MatrixNS U = MatrixNS::Zero();
@@ -114,6 +114,10 @@ template <typename _Scalar = double> class SE3 {
     SE3(const SO3S& R, const Vector3S& x) {
         this->R = R;
         this->x = x;
+    }
+
+    template <typename _Scalar2> SE3<_Scalar2> cast() const {
+        return SE3<_Scalar2>(R.template cast<_Scalar2>(), x.template cast<_Scalar2>());
     }
 
     void setIdentity() {
@@ -167,4 +171,4 @@ using se3f = Eigen::Matrix<float, 6, 1>;
 using se3cd = Eigen::Matrix<Eigen::dcomplex, 6, 1>;
 using se3cf = Eigen::Matrix<Eigen::scomplex, 6, 1>;
 
-}
+} // namespace liepp
