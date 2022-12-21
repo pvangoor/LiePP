@@ -78,7 +78,11 @@ template <int n, typename _Scalar = double> class SOn {
     SOn() = default;
     SOn(const MatrixNS& mat) {
         // Project to nearest orthogonal matrix
-        Eigen::BDCSVD<MatrixNS> svd(mat, Eigen::ComputeFullU | Eigen::ComputeFullV);
+#if EIGEN_MAJOR_VERSION >= 4 && EIGEN_MINOR_VERSION > 90
+    Eigen::BDCSVD<MatrixNS, Eigen::ComputeThinU | Eigen::ComputeThinV> svd(mat);
+#else
+    Eigen::BDCSVD<MatrixNS> svd(mat, Eigen::ComputeThinU | Eigen::ComputeThinV);
+#endif
         R = svd.matrixU() * svd.matrixV().transpose();
     }
     SOn inverse() const {
