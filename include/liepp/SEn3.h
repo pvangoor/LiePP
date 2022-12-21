@@ -32,6 +32,7 @@ template <int n, typename _Scalar = double> class SEn3 {
     using VectorDS = Eigen::Matrix<_Scalar, CDim, 1>;
     using MatrixDS = Eigen::Matrix<_Scalar, CDim, CDim>;
     using SO3S = SO3<_Scalar>;
+    using SE3S = SE3<_Scalar>;
 
     static MatrixNS wedge(const VectorDS& u) {
         // u is in the format (omega, v_1, ..., v_n)
@@ -122,6 +123,25 @@ template <int n, typename _Scalar = double> class SEn3 {
         std::for_each(result.x.begin(), result.x.end(), [](Vector3S& x_i) { x_i.setRandom(); });
         return result;
     }
+
+    static MatrixDS leftJacobian(const VectorDS& u) {
+        Vector3S w = u.template block<3, 1>(0, 0);
+        Scalar ang = w.norm();
+        if (ang < 1e-6) {
+            return MatrixDS::Identity() + Scalar(0.5) * adjoint(u);
+        }
+        Matrix3S SO3JL = SO3S::leftJacobian(w);
+        MatrixDS J = MatrixDS::Zero();
+        J.template block<3, 3>(0, 0) = SO3JL;
+        for (int i = 0; i < n; ++i) {
+            Vector3S x = u.template block<3, 1>(3 + 3 * i, 0);
+            J.template block<3, 3>(3 + 3 * i, 0) = SE3S::leftJacobianQ(w, x);
+            J.template block<3, 3>(3 + 3 * i, 3 + 3 * i) = SO3JL;
+        }
+        return J;
+    }
+
+    static MatrixDS rightJacobian(const VectorDS& u) { return leftJacobian(-u); }
 
     SEn3() = default;
     SEn3(const SEn3& other) {

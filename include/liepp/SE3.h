@@ -105,6 +105,47 @@ template <typename _Scalar = double> class SE3 {
     static SE3 Identity() { return SE3(SO3S::Identity(), Vector3S::Zero()); }
     static SE3 Random() { return SE3(SO3S::Random(), Vector3S::Random()); }
 
+    static Matrix3S leftJacobianQ(const Vector3S& w, const Vector3S& v) {
+        Matrix3S p = SO3S::skew(w);
+        Matrix3S r = SO3S::skew(v);
+
+        Scalar ang = w.norm();
+        Scalar s = sin(ang);
+        Scalar c = cos(ang);
+
+        Scalar ang_p2 = pow(ang, 2);
+        Scalar ang_p3 = ang_p2 * ang;
+        Scalar ang_p4 = ang_p3 * ang;
+        Scalar ang_p5 = ang_p4 * ang;
+
+        Scalar c1 = (ang - s) / ang_p3;
+        Scalar c2 = (Scalar(0.5) * ang_p2 + c - Scalar(1.0)) / ang_p4;
+        Scalar c3 = (ang * (Scalar(1.0) + Scalar(0.5) * c) - Scalar(1.5) * s) / ang_p5;
+
+        Matrix3S m1 = p * r + r * p + p * r * p;
+        Matrix3S m2 = p * p * r + r * p * p - Scalar(3.0) * p * r * p;
+        Matrix3S m3 = p * r * p * p + p * p * r * p;
+
+        return Scalar(0.5) * r + c1 * m1 + c2 * m2 + c3 * m3;
+    }
+
+    static MatrixDS leftJacobian(const VectorDS& u) {
+        Vector3S w = u.template block<3, 1>(0, 0);
+        Vector3S v = u.template block<3, 1>(3, 0);
+        Scalar ang = w.norm();
+        if (ang < 1e-6) {
+            return MatrixDS::Identity() + Scalar(0.5) * adjoint(u);
+        }
+        Matrix3S SO3JL = SO3S::leftJacobian(w);
+        MatrixDS J = MatrixDS::Zero();
+        J.template block<3, 3>(0, 0) = SO3JL;
+        J.template block<3, 3>(3, 3) = SO3JL;
+        J.template block<3, 3>(3, 0) = leftJacobianQ(w, v);
+        return J;
+    }
+
+    static MatrixDS rightJacobian(const VectorDS& u) { return leftJacobian(-u); }
+
     SE3() = default;
     SE3(const SE3& other) = default;
     SE3(const MatrixNS& mat) {
