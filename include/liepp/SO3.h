@@ -43,7 +43,7 @@ template <typename _Scalar = double> class SO3 {
     static SO3 exp(const VectorDS& w) {
         _Scalar theta = w.norm() / _Scalar(2.0);
         QuaternionS result;
-        if (theta > 0.0) {
+        if (theta > 1e-6) {
             result.w() = cos(theta);
             result.vec() = sin(theta) * w.normalized();
         } else {
@@ -61,6 +61,19 @@ template <typename _Scalar = double> class SO3 {
         MatrixDS Omega = coefficient * (R - R.transpose());
         return vex(Omega);
     }
+
+    static MatrixDS leftJacobian(const VectorDS& w) {
+        _Scalar angle = w.norm();
+        if (angle < 1e-6) {
+            return MatrixDS::Identity() + _Scalar(0.5) * skew(w);
+        }
+        VectorDS ax = w / angle;
+        _Scalar s = sin(angle) / angle;
+        _Scalar c = cos(angle);
+        return s * MatrixDS::Identity() + ((Scalar(1.0) - c) / angle) * skew(ax) + (Scalar(1.0) - s) * ax * ax.transpose();
+    }
+
+    static MatrixDS rightJacobian(const VectorDS& w) { return leftJacobian(-w); }
 
     static SO3 SO3FromVectors(const VectorDS& origin, const VectorDS& dest) {
         SO3 result;
