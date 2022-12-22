@@ -25,6 +25,8 @@
 #include "liepp/SOn.h"
 #include "gtest/gtest.h"
 
+using testing::Types;
+
 #include <type_traits>
 template <class T> struct is_complex : std::false_type {};
 template <class T> struct is_complex<std::complex<T>> : std::true_type {};
@@ -71,50 +73,25 @@ TEST(TestGroups, SO3FromVectors) {
     }
 }
 
-TEST(TestGroups, SO3Jacobians) {
-    // Test left and right jacobians for SO(3) via adjoints
+template <typename T> class JacobiansTest : public testing::Test {};
+typedef Types<SO3d, SE3d, SE23d> MatrixGroupsWithJacobians;
+TYPED_TEST_SUITE(JacobiansTest, MatrixGroupsWithJacobians);
+
+TYPED_TEST(JacobiansTest, TestLeftJacobian) {
+    // Test left jacobian for a given matrix group
     for (int i = 0; i < 100; ++i) {
-        Vector3d w = Vector3d::Random();
-        Matrix3d Jl = SO3d::leftJacobian(w);
+        typename TypeParam::VectorDS u = TypeParam::VectorDS::Random();
+        typename TypeParam::MatrixDS Jl = TypeParam::leftJacobian(u);
 
-        Matrix3d A = SO3d::exp(w).Adjoint();
-        Matrix3d B = Eigen::Matrix3d::Identity() + SO3d::adjoint(w) * Jl;
-        
-        testMatrixEquality(A, B);
-    }
-}
-
-TEST(TestGroups, SE3Jacobians) {
-    // Test left and right jacobians for SE(3)
-    for (int i = 0; i < 100; ++i) {
-        VectorXd u = VectorXd::Random(6, 1);
-        MatrixXd Jl = SE3d::leftJacobian(u);
-
-        MatrixXd A = SE3d::exp(u).Adjoint();
-        MatrixXd B = Eigen::MatrixXd::Identity(6, 6) + SE3d::adjoint(u) * Jl;
-    
-        testMatrixEquality(A, B);
-    }
-}
-
-TEST(TestGroups, SE23Jacobians) {
-    // Test left and right jacobians for SE2(3)
-    for (int i = 0; i < 100; ++i) {
-        VectorXd u = VectorXd::Random(9, 1);
-        MatrixXd Jl = SE23d::leftJacobian(u);
-
-        MatrixXd A = SE23d::exp(u).Adjoint();
-        MatrixXd B = Eigen::MatrixXd::Identity(9, 9) + SE23d::adjoint(u) * Jl;
+        typename TypeParam::MatrixDS A = TypeParam::exp(u).Adjoint();
+        typename TypeParam::MatrixDS B = TypeParam::MatrixDS::Identity() + TypeParam::adjoint(u) * Jl;
     
         testMatrixEquality(A, B);
     }
 }
 
 template <typename T> class MatrixGroupTest : public testing::Test {};
-
-using testing::Types;
 typedef Types<SO3d, SE3d, SOT3d, SE23d, SL3d, GLnd<5>, GLncd<3>, SOnd<4>> MatrixGroups;
-
 TYPED_TEST_SUITE(MatrixGroupTest, MatrixGroups);
 
 TYPED_TEST(MatrixGroupTest, TestExpLog) {
